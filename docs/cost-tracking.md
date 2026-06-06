@@ -175,6 +175,13 @@ Single source of truth for **what costs what** in this project. Updated every ti
 
 ---
 
+### 12a. Source code hosting
+
+| Tier | Choice | Cost | Notes |
+|---|---|---|---|
+| 🟢 In-use | **GitHub** (private repo: `piyush-official/FilterNArrange`) | $0 | Personal account; unlimited private repos free. Will flip to public when license is decided. |
+| 🟡 Alt | GitLab / Codeberg | $0 | Direct alternatives if GitHub dependence becomes a concern. |
+
 ### 12. CI / CD
 
 | Tier | Choice | Cost | Notes |
@@ -239,6 +246,36 @@ Single source of truth for **what costs what** in this project. Updated every ti
 | 🟡 Alt | GitHub Sponsors | 0% fee for OSS maintainers | Best for pure-OSS monetization. |
 
 ---
+
+### 20. Development & testing tooling
+
+All chosen for $0 cost and OSS licensing. See spec §7 for usage details.
+
+| Module | Choice | Tier | Notes |
+|---|---|---|---|
+| Commit-message lint | **commitlint + husky** | 🟢 Free | npm; local pre-commit hook. |
+| CHANGELOG generation | **git-cliff** | 🟢 Free | Single Rust binary. |
+| Release automation | **release-please** (GitHub Action) | 🟢 Free | Opens release PRs, tags, builds GH releases. |
+| Java architecture tests | **ArchUnit** | 🟢 Free | Apache 2.0. |
+| Python architecture tests | **import-linter** | 🟢 Free | BSD-3. |
+| TS architecture tests | **eslint-plugin-boundaries** + **eslint-plugin-import** | 🟢 Free | MIT. |
+| OpenAPI fuzz / contract tests | **schemathesis** | 🟢 Free | MIT. |
+| Integration test harness | **testcontainers** (JVM + Python) | 🟢 Free | MIT/Apache 2.0. |
+| E2E browser tests | **Playwright** | 🟢 Free | Apache 2.0. |
+| Performance / load | **k6** (OSS edition) | 🟢 Free | AGPL-3.0 (binary only — does not contaminate test scripts). |
+| Coverage | **Codecov** (free for OSS) | 🟢 Free | Triggered if private repo exceeds free limits → self-host **Sonarqube CE** ($0). |
+| Mutation testing (Java) | **PIT** | 🟢 Free | Apache 2.0. |
+| Mutation testing (Python) | **mutmut** | 🟢 Free | BSD. |
+| Security — DAST | **OWASP ZAP** (baseline scan) | 🟢 Free | Apache 2.0. |
+| Security — container image scan | **Trivy** | 🟢 Free | Apache 2.0. |
+| Security — secret scanning | **gitleaks** + GitHub native | 🟢 Free | MIT. |
+| Supply chain — SBOM | **Syft** | 🟢 Free | Apache 2.0. |
+| Supply chain — image signing | **Cosign** | 🟢 Free | Apache 2.0. |
+| Dependency updates | **Dependabot** | 🟢 Free | GitHub native. |
+
+**Scaling notes**
+- All tools above are pure-PR-time cost on GitHub Actions; the 2 000 min/mo private quota is plenty for v1. Once public the quota becomes unlimited.
+- If GitHub Actions minutes ever pinch (e.g. heavy nightly E2E + mutation), self-host a runner on the same VM as the deploy ($0 extra) before considering paid CI tiers.
 
 ### 19. Hosting / compute
 
