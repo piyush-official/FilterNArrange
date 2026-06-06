@@ -1,0 +1,11 @@
+FilterNArrange
+Copyright (c) 2026 Piyush
+
+This project is in pre-release development. A formal open-source license has
+not yet been chosen — see docs/decisions/ADR-0001-initial-stack-and-principles.md
+("Follow-ups" section) for the pending decision between AGPL-3.0 and Apache-2.0.
+
+Until a LICENSE file is committed to this repository, all rights are reserved
+by the copyright holder. No permission is granted to copy, modify, or
+redistribute this code. This NOTICE will be removed and replaced with a LICENSE
+file once the license decision is made (tracked in ADR-0002).

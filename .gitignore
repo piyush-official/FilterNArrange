@@ -1,0 +1,83 @@
+# ─── OS / editor ──────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+
+# ─── Java / Spring Boot ───────────────────────────────────────
+target/
+build/
+*.class
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+hs_err_pid*
+HELP.md
+
+# ─── Gradle ────────────────────────────────────────────────────
+.gradle/
+gradle-app.setting
+!gradle-wrapper.jar
+!gradle-wrapper.properties
+
+# ─── Maven ─────────────────────────────────────────────────────
+mvnw
+mvnw.cmd
+.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.properties
+
+# ─── Node / React ──────────────────────────────────────────────
+node_modules/
+dist/
+.next/
+.cache/
+coverage/
+.eslintcache
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ─── Python ────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+htmlcov/
+.coverage
+.coverage.*
+
+# ─── Env / secrets ─────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# ─── Docker / data volumes ─────────────────────────────────────
+.docker/
+data/
+
+# ─── Logs / temp ───────────────────────────────────────────────
+*.log
+*.tmp
+*.bak
+
+# ─── Brainstorming companion ───────────────────────────────────
+.superpowers/
