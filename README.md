@@ -29,4 +29,4 @@ See [docs/cost-tracking.md](docs/cost-tracking.md) for the full cost breakdown a
 
 ## License
 
-A formal license has not yet been chosen. See [NOTICE](NOTICE) and [ADR-0001](docs/decisions/ADR-0001-initial-stack-and-principles.md). All rights reserved until a `LICENSE` file is committed (planned: AGPL-3.0 or Apache-2.0).
+FilterNArrange is licensed under the [Apache License, Version 2.0](LICENSE) — see [ADR-0002](docs/decisions/ADR-0002-license.md) for the rationale.
