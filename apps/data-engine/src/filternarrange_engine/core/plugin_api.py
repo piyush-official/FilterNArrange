@@ -6,7 +6,7 @@ stay stable.
 """
 from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import Any, AsyncIterator, BinaryIO, Generic, Literal, Protocol, TypeVar, TypedDict, Union
+from typing import Any, BinaryIO, Generic, Literal, Protocol, TypeVar, TypedDict, Union
 
 from .canonical import TabularData, TreeData
 

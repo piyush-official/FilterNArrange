@@ -4,8 +4,11 @@ import io as _io
 import uuid
 from typing import Protocol
 
+from typing import cast
+
 from filternarrange_engine.adapters.plugin_registry.registry import PluginRegistry
 from filternarrange_engine.core.canonical import TabularData
+from filternarrange_engine.core.plugin_api import ColumnFilterSpec
 from filternarrange_engine.platform.config import EngineSettings
 from filternarrange_engine.platform.errors import EngineError
 
@@ -17,7 +20,9 @@ class _Store(Protocol):
 
 class ConvertService:
     def __init__(self, store: _Store, registry: PluginRegistry, settings: EngineSettings):
-        self.store = store; self.registry = registry; self.settings = settings
+        self.store = store
+        self.registry = registry
+        self.settings = settings
 
     def run(self, ref: str, spec: dict, output_format: str) -> dict:
         try:
@@ -40,7 +45,7 @@ class ConvertService:
         if isinstance(parsed, TabularData):
             try:
                 filter_plugin = self.registry.get_filter(spec.get("kind", ""))
-                parsed = filter_plugin.apply(parsed, spec)
+                parsed = filter_plugin.apply(parsed, cast(ColumnFilterSpec, spec))
             except KeyError as e:
                 raise EngineError(code="UNKNOWN_FILTER", message=str(e), http_status=422) from e
 

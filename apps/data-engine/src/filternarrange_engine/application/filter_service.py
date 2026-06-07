@@ -2,10 +2,11 @@
 from __future__ import annotations
 import asyncio
 import io as _io
-from typing import Protocol
+from typing import Protocol, cast
 
 from filternarrange_engine.adapters.plugin_registry.registry import PluginRegistry
 from filternarrange_engine.core.canonical import TabularData
+from filternarrange_engine.core.plugin_api import ColumnFilterSpec
 from filternarrange_engine.platform.errors import EngineError
 
 
@@ -15,7 +16,8 @@ class _Store(Protocol):
 
 class FilterService:
     def __init__(self, store: _Store, registry: PluginRegistry):
-        self.store = store; self.registry = registry
+        self.store = store
+        self.registry = registry
 
     def run(self, ref: str, spec: dict, sample_size: int) -> dict:
         try:
@@ -33,18 +35,22 @@ class FilterService:
             raise EngineError(code="NOT_TABULAR", message="filter requires tabular data", http_status=422)
 
         kind = spec.get("kind")
+        if not isinstance(kind, str):
+            raise EngineError(code="VALIDATION_FAILED", message="filter.kind must be a string", http_status=400)
         try:
             filter_plugin = self.registry.get_filter(kind)
         except KeyError as e:
             raise EngineError(code="UNKNOWN_FILTER", message=f"no filter for kind={kind}",
                               http_status=422) from e
 
-        errs = filter_plugin.validate(spec)
+        typed_spec = cast(ColumnFilterSpec, spec)
+        errs = filter_plugin.validate(typed_spec)
         if errs:
             raise EngineError(code="VALIDATION_FAILED",
                               message="; ".join(f"{e.field}: {e.message}" for e in errs),
                               http_status=400)
-        filtered = filter_plugin.apply(parsed, spec)
+        filtered = filter_plugin.apply(parsed, typed_spec)
+        assert isinstance(filtered, TabularData), "filter must return tabular data"
 
         async def collect():
             out = []

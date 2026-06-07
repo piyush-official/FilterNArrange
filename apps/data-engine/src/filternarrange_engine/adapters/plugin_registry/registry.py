@@ -6,7 +6,6 @@ for tests. Honors the FILTERNARRANGE_DISABLED_PLUGINS env var.
 from __future__ import annotations
 import os
 from importlib.metadata import entry_points
-from typing import Any
 
 from filternarrange_engine.core.plugin_api import FormatPlugin, FilterPlugin
 

@@ -1,10 +1,6 @@
-import io
-import pytest
-from filternarrange_engine.core.types import TypeTag
-from filternarrange_engine.core.canonical import Column, TabularData
 from filternarrange_engine.core.plugin_api import (
-    FormatManifest, FilterManifest, DetectResult,
-    FormatPlugin, FilterPlugin, FilterSpec, PluginResult,
+    FormatManifest, DetectResult,
+    FormatPlugin, FilterSpec, PluginResult,
 )
 
 

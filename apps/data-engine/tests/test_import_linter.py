@@ -1,7 +1,5 @@
-import os
 import pathlib
 
-import pytest
 
 
 def test_import_linter_passes(monkeypatch):

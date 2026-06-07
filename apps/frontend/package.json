@@ -9,14 +9,10 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-<<<<<<< HEAD
-    "typecheck": "tsc -b"
-=======
     "test:e2e": "playwright test",
-    "typecheck": "tsc -b --noEmit",
+    "typecheck": "tsc -b",
     "lint": "eslint src --max-warnings=0",
     "gen:api": "openapi --input ../../contracts/openapi/gateway-public.v1.yaml --output src/shared/api/generated --client fetch --useOptions"
->>>>>>> 459ea59 (feat(frontend): generated API client + auth feature (login/signup))
   },
   "dependencies": {
     "react": "^18.3.1",

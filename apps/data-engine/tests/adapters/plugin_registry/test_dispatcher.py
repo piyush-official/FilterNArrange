@@ -1,6 +1,4 @@
-import pytest
 from filternarrange_engine.adapters.plugin_registry.dispatcher import dispatch_plugin_call
-from filternarrange_engine.core.plugin_api import PluginResult
 
 
 def test_dispatch_success():

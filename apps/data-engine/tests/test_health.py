@@ -2,13 +2,8 @@
 """Health endpoint contract test."""
 
 from fastapi.testclient import TestClient
-<<<<<<< HEAD
-from filternarrange_engine.api.main import app
-=======
-
-from filternarrange_engine.api.main import build_app
 from filternarrange_engine.adapters.plugin_registry.registry import PluginRegistry
->>>>>>> e3cf1cb (feat(data-engine): FastAPI routers + detect/filter/convert services)
+from filternarrange_engine.api.main import build_app
 
 
 def test_healthz_returns_ok() -> None:
