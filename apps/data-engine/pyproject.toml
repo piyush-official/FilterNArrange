@@ -24,6 +24,7 @@ dev = [
   "import-linter==2.1",
   "ruff==0.6.9",
   "mypy==1.11.2",
+  "types-jsonschema",
 ]
 
 [build-system]
@@ -37,3 +38,7 @@ packages = ["src/filternarrange_engine"]
 asyncio_mode = "auto"
 testpaths = ["tests"]
 pythonpath = ["src"]
+
+[[tool.mypy.overrides]]
+module = "aiokafka.*"
+ignore_missing_imports = true
