@@ -1,0 +1,22 @@
+[project]
+name = "filternarrange-format-csv"
+version = "1.0.0"
+description = "CSV format plugin for FilterNArrange"
+requires-python = ">=3.12"
+license = { text = "Apache-2.0" }
+dependencies = [
+  "filternarrange-engine",
+]
+
+[project.entry-points."filternarrange.formats"]
+csv = "filternarrange_format_csv:plugin"
+
+[project.optional-dependencies]
+dev = ["pytest==8.3.3", "pytest-asyncio==0.24.0"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"

@@ -1,0 +1,20 @@
+[project]
+name = "filternarrange-filter-column"
+version = "1.0.0"
+description = "Column-projection filter plugin"
+requires-python = ">=3.12"
+license = { text = "Apache-2.0" }
+dependencies = ["filternarrange-engine"]
+
+[project.entry-points."filternarrange.filters"]
+column = "filternarrange_filter_column:plugin"
+
+[project.optional-dependencies]
+dev = ["pytest==8.3.3", "pytest-asyncio==0.24.0"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"

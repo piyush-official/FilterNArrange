@@ -1,36 +1,162 @@
 openapi: 3.1.0
 info:
-  title: FilterNArrange gateway — internal API
-  summary: Surface called by the data-engine and other internal services
+  title: FilterNArrange Gateway → Data-engine Internal API
   version: 1.0.0
-  description: |
-    Internal-only REST surface. Not reachable from outside the compose network
-    (per spec §2 loose-coupling rule 2). Versioned independently of the public
-    surface.
   license:
     name: Apache-2.0
-    url: https://www.apache.org/licenses/LICENSE-2.0
 servers:
-  - url: http://gateway:8080
-    description: Internal compose network
+  - url: http://data-engine:8000
+tags:
+  - name: detect
+  - name: filter
+  - name: convert
+  - name: health
 paths:
   /health:
     get:
-      operationId: getInternalHealth
-      summary: Liveness probe (internal).
+      tags: [health]
+      operationId: internalHealth
+      deprecated: true
+      description: |
+        Liveness probe — kept as a deprecated stub during the Plan A → Plan B
+        transition. Use the data-engine probe (`/healthz`) instead.
+        Scheduled for removal in Plan G.
       responses:
-        "200":
-          description: Service is up.
+        '200':
+          description: ok
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/HealthResponse"
+                type: object
+                required: [status]
+                properties:
+                  status: { type: string, example: UP }
+  /detect:
+    post:
+      tags: [detect]
+      operationId: engineDetect
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RefRequest' }
+      responses:
+        '200':
+          description: detected
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DetectResult' }
+        '4XX': { $ref: '#/components/responses/Error' }
+        '5XX': { $ref: '#/components/responses/Error' }
+  /filter:
+    post:
+      tags: [filter]
+      operationId: engineFilter
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FilterRequest' }
+      responses:
+        '200':
+          description: filtered
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FilterResult' }
+        '4XX': { $ref: '#/components/responses/Error' }
+        '5XX': { $ref: '#/components/responses/Error' }
+  /convert:
+    post:
+      tags: [convert]
+      operationId: engineConvert
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ConvertRequest' }
+      responses:
+        '200':
+          description: converted
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ConvertResult' }
+        '4XX': { $ref: '#/components/responses/Error' }
+        '5XX': { $ref: '#/components/responses/Error' }
 components:
+  responses:
+    Error:
+      description: structured plugin or engine error
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorEnvelope' }
   schemas:
-    HealthResponse:
+    RefRequest:
       type: object
-      required: [status]
+      required: [ref]
       properties:
-        status:
+        ref: { type: string }
+    Column:
+      type: object
+      required: [name, type, nullable]
+      properties:
+        name: { type: string }
+        type:
           type: string
-          enum: [UP]
+          enum: [string, number, integer, boolean, datetime, "null"]
+        nullable: { type: boolean }
+    DetectResult:
+      type: object
+      required: [format, confidence, schema]
+      properties:
+        format: { type: string }
+        confidence: { type: number, minimum: 0, maximum: 1 }
+        schema:
+          type: array
+          items: { $ref: '#/components/schemas/Column' }
+    ColumnFilterSpec:
+      type: object
+      required: [kind, keep]
+      properties:
+        kind: { type: string, enum: [column] }
+        keep:
+          type: array
+          items: { type: string }
+    FilterRequest:
+      type: object
+      required: [ref, filter]
+      properties:
+        ref: { type: string }
+        filter: { $ref: '#/components/schemas/ColumnFilterSpec' }
+        sampleSize: { type: integer, default: 20 }
+    FilterResult:
+      type: object
+      required: [schema, rows]
+      properties:
+        schema:
+          type: array
+          items: { $ref: '#/components/schemas/Column' }
+        rows:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+    ConvertRequest:
+      type: object
+      required: [ref, filter, outputFormat]
+      properties:
+        ref: { type: string }
+        filter: { $ref: '#/components/schemas/ColumnFilterSpec' }
+        outputFormat: { type: string, enum: [csv, json] }
+    ConvertResult:
+      type: object
+      required: [resultRef]
+      properties:
+        resultRef: { type: string }
+    ErrorEnvelope:
+      type: object
+      required: [code, message, traceId]
+      properties:
+        code: { type: string }
+        pluginId: { type: string, nullable: true }
+        message: { type: string }
+        traceId: { type: string }

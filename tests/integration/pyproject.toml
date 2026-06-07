@@ -1,0 +1,13 @@
+[project]
+name = "filternarrange-integration-tests"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+  "pytest==8.3.3",
+  "httpx==0.27.2",
+  "testcontainers[minio,postgres]==4.8.1",
+  "docker==7.1.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["."]
