@@ -10,6 +10,7 @@ needed they can be removed safely.
 | `feat/plan-b-walking-skeleton` | [#2](https://github.com/piyush-official/FilterNArrange/pull/2) | `0d49f20` | 2026-06-07 |
 | `feat/plan-c-plugin-breadth`   | [#3](https://github.com/piyush-official/FilterNArrange/pull/3) | `a5827dc` | 2026-06-07 |
 | `feat/plan-c-gateway-openapi-frontend` | [#4](https://github.com/piyush-official/FilterNArrange/pull/4) | `0a39f5f` | 2026-06-07 |
+| `feat/plan-c-frontend`         | [#5](https://github.com/piyush-official/FilterNArrange/pull/5) | `2e76923` | 2026-06-07 |
 
 ## How to delete them
 
@@ -22,12 +23,14 @@ git push origin --delete feat/plan-a-foundation
 git push origin --delete feat/plan-b-walking-skeleton
 git push origin --delete feat/plan-c-plugin-breadth
 git push origin --delete feat/plan-c-gateway-openapi-frontend
+git push origin --delete feat/plan-c-frontend
 
 # Delete local copies
 git branch -D feat/plan-a-foundation
 git branch -D feat/plan-b-walking-skeleton
 git branch -D feat/plan-c-plugin-breadth
 git branch -D feat/plan-c-gateway-openapi-frontend
+git branch -D feat/plan-c-frontend
 
 # Drop this file once every branch in the table is gone
 git rm MERGED_BRANCHES.md
