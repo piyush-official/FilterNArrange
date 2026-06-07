@@ -12,7 +12,7 @@ import uuid
 from typing import Any, Mapping
 
 from fastapi import APIRouter, HTTPException, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from filternarrange_engine.adapters.llm.registry import CapabilityNotFoundError
 from filternarrange_engine.core.llm import (
@@ -24,29 +24,39 @@ from filternarrange_engine.core.llm import (
 _log = logging.getLogger(__name__)
 
 
+# Pydantic v2 reserves ``schema`` as a BaseModel method, so we name the field
+# ``data_schema`` and alias it to ``schema`` on the wire. populate_by_name keeps
+# constructor calls in unit tests working with the Python-side attribute name.
+_REQUEST_MODEL_CONFIG = ConfigDict(populate_by_name=True)
+
+
 class NlToFilterRequest(BaseModel):
+    model_config = _REQUEST_MODEL_CONFIG
     ref: str
     query: str = Field(min_length=1, max_length=2000)
-    schema: list[dict] = Field(default_factory=list)
+    data_schema: list[dict] = Field(default_factory=list, alias="schema")
 
 
 class SummaryRequest(BaseModel):
+    model_config = _REQUEST_MODEL_CONFIG
     ref: str
-    schema: list[dict]
+    data_schema: list[dict] = Field(alias="schema")
     sample_rows: list[dict]
     total_rows: int
     total_size_bytes: int
 
 
 class ChartSuggestRequest(BaseModel):
+    model_config = _REQUEST_MODEL_CONFIG
     ref: str
-    schema: list[dict]
+    data_schema: list[dict] = Field(alias="schema")
     cardinality_per_column: dict[str, int]
 
 
 class AnomalyRequest(BaseModel):
+    model_config = _REQUEST_MODEL_CONFIG
     ref: str
-    schema: list[dict]
+    data_schema: list[dict] = Field(alias="schema")
     sample_rows: list[dict]
     summary_stats: dict[str, Any]
 
@@ -112,19 +122,19 @@ def build_ai_router(orchestrator, enabled_names: set[str]) -> APIRouter:
 
     @router.post("/nl-to-filter")
     async def nl_to_filter(req: NlToFilterRequest):
-        return await _run("nl_to_filter", req.model_dump())
+        return await _run("nl_to_filter", req.model_dump(by_alias=True))
 
     @router.post("/summary")
     async def summary(req: SummaryRequest):
-        return await _run("auto_summary", req.model_dump())
+        return await _run("auto_summary", req.model_dump(by_alias=True))
 
     @router.post("/chart-suggest")
     async def chart_suggest(req: ChartSuggestRequest):
-        return await _run("chart_suggest", req.model_dump())
+        return await _run("chart_suggest", req.model_dump(by_alias=True))
 
     @router.post("/anomaly")
     async def anomaly(req: AnomalyRequest):
-        return await _run("anomaly_detect", req.model_dump())
+        return await _run("anomaly_detect", req.model_dump(by_alias=True))
 
     return router
 
