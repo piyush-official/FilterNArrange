@@ -1,0 +1,35 @@
+openapi: 3.1.0
+info:
+  title: FilterNArrange gateway — public API
+  summary: Frontend-facing REST + WebSocket surface
+  version: 1.0.0
+  description: |
+    Public surface of the FilterNArrange gateway. Consumed by the React
+    frontend. Versioned per spec §3 (rule 4: explicit `/api/v1/...`).
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: https://localhost:8443
+    description: Local dev (via Caddy)
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      summary: Liveness probe.
+      responses:
+        "200":
+          description: Service is up.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [UP]

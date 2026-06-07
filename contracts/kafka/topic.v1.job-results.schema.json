@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filternarrange.io/contracts/kafka/topic.v1.job-results.schema.json",
+  "title": "topic.v1.job-results",
+  "description": "Skeleton for job-result events produced by the data-engine worker. Plan D adds the full payload.",
+  "type": "object",
+  "required": ["job_id", "schema_version", "status"],
+  "properties": {
+    "job_id": { "type": "string", "format": "uuid" },
+    "schema_version": { "type": "string", "const": "v1" },
+    "status": { "type": "string", "enum": ["completed", "failed", "cancelled"] }
+  },
+  "additionalProperties": true
+}

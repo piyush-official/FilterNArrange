@@ -1,0 +1,36 @@
+openapi: 3.1.0
+info:
+  title: FilterNArrange gateway — internal API
+  summary: Surface called by the data-engine and other internal services
+  version: 1.0.0
+  description: |
+    Internal-only REST surface. Not reachable from outside the compose network
+    (per spec §2 loose-coupling rule 2). Versioned independently of the public
+    surface.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://gateway:8080
+    description: Internal compose network
+paths:
+  /health:
+    get:
+      operationId: getInternalHealth
+      summary: Liveness probe (internal).
+      responses:
+        "200":
+          description: Service is up.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [UP]

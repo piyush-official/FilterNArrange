@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filternarrange.io/contracts/kafka/topic.v1.jobs.schema.json",
+  "title": "topic.v1.jobs",
+  "description": "Skeleton for jobs produced by the gateway. Plan D adds the full payload (kind, user_id, params, idempotency_key, etc.).",
+  "type": "object",
+  "required": ["job_id", "schema_version"],
+  "properties": {
+    "job_id": { "type": "string", "format": "uuid" },
+    "schema_version": { "type": "string", "const": "v1" }
+  },
+  "additionalProperties": true
+}
