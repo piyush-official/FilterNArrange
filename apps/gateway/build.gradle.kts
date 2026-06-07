@@ -12,12 +12,22 @@ java { toolchain { languageVersion.set(JavaLanguageVersion.of(21)) } }
 
 repositories { mavenCentral() }
 
+// Plan D §3 — schemas in contracts/kafka land on the runtime classpath so
+// JsonSchemaValidator can load them as resources at /contracts/kafka/*.
+sourceSets {
+    named("main") {
+        resources.srcDir(rootProject.file("contracts"))
+    }
+}
+
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springframework.boot:spring-boot-starter-websocket")
+    implementation("org.springframework.kafka:spring-kafka:3.2.4")
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb:flyway-database-postgresql")
     runtimeOnly("org.postgresql:postgresql")
@@ -29,9 +39,11 @@ dependencies {
     implementation("io.github.resilience4j:resilience4j-spring-boot3:2.2.0")
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("com.fasterxml.jackson.module:jackson-module-parameter-names")
+    implementation("com.github.erosb:everit-json-schema:1.14.4")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
+    testImplementation("org.springframework.kafka:spring-kafka-test:3.2.4")
     testImplementation("org.testcontainers:junit-jupiter:1.20.1")
     testImplementation("org.testcontainers:postgresql:1.20.1")
     testImplementation("org.testcontainers:minio:1.20.1")
