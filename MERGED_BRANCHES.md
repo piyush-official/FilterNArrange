@@ -11,6 +11,7 @@ needed they can be removed safely.
 | `feat/plan-c-plugin-breadth`   | [#3](https://github.com/piyush-official/FilterNArrange/pull/3) | `a5827dc` | 2026-06-07 |
 | `feat/plan-c-gateway-openapi-frontend` | [#4](https://github.com/piyush-official/FilterNArrange/pull/4) | `0a39f5f` | 2026-06-07 |
 | `feat/plan-c-frontend`         | [#5](https://github.com/piyush-official/FilterNArrange/pull/5) | `2e76923` | 2026-06-07 |
+| `feat/plan-d-async-path`       | [#6](https://github.com/piyush-official/FilterNArrange/pull/6) | `93ec852` | 2026-06-07 |
 
 ## How to delete them
 
@@ -24,6 +25,7 @@ git push origin --delete feat/plan-b-walking-skeleton
 git push origin --delete feat/plan-c-plugin-breadth
 git push origin --delete feat/plan-c-gateway-openapi-frontend
 git push origin --delete feat/plan-c-frontend
+git push origin --delete feat/plan-d-async-path
 
 # Delete local copies
 git branch -D feat/plan-a-foundation
@@ -31,6 +33,7 @@ git branch -D feat/plan-b-walking-skeleton
 git branch -D feat/plan-c-plugin-breadth
 git branch -D feat/plan-c-gateway-openapi-frontend
 git branch -D feat/plan-c-frontend
+git branch -D feat/plan-d-async-path
 
 # Drop this file once every branch in the table is gone
 git rm MERGED_BRANCHES.md
