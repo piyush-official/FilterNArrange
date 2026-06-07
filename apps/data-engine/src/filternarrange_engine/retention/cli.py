@@ -50,7 +50,7 @@ def _build_default_sweeper(cfg: RetentionConfig):
     pure and testable; this is the imperative shell.
     """
     import os
-    from .sweeper import Sweeper, BlobStore, TierLookup, BlobRef
+    from .sweeper import Sweeper, BlobRef
     from minio import Minio
     import psycopg
 
