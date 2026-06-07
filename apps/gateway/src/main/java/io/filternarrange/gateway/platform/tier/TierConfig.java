@@ -1,16 +1,19 @@
 // SPDX-License-Identifier: Apache-2.0
-package io.filternarrange.gateway.domain.tier;
+package io.filternarrange.gateway.platform.tier;
 
+import io.filternarrange.gateway.domain.tier.Tier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 /**
  * Tier-specific knobs sourced from ``filternarrange.tier`` in application.yml.
  * A value of ``0`` in a daily-ops or upload-size slot means "unlimited" — the
  * filters short-circuit before enforcement when {@link #isUnlimitedOps} /
  * {@link #isUnlimitedUpload} returns true.
+ *
+ * <p>Registered via {@code @ConfigurationPropertiesScan} on
+ * {@code GatewayApplication} — records can't have a no-arg constructor, so
+ * {@code @Component} would fail bean instantiation.
  */
-@Component
 @ConfigurationProperties(prefix = "filternarrange.tier")
 public record TierConfig(
     int freeTierMaxUploadMb,

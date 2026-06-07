@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-package io.filternarrange.gateway.application.plugin;
+package io.filternarrange.gateway.platform.plugin;
 
 import io.filternarrange.gateway.domain.tier.Tier;
 import org.springframework.data.redis.core.StringRedisTemplate;

@@ -2,9 +2,9 @@
 package io.filternarrange.gateway.platform.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.filternarrange.gateway.application.tier.TierResolver;
+import io.filternarrange.gateway.platform.tier.TierResolver;
 import io.filternarrange.gateway.domain.tier.Tier;
-import io.filternarrange.gateway.domain.tier.TierConfig;
+import io.filternarrange.gateway.platform.tier.TierConfig;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

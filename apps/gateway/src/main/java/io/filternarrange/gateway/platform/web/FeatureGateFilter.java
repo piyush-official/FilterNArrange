@@ -2,8 +2,8 @@
 package io.filternarrange.gateway.platform.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.filternarrange.gateway.application.plugin.PluginRegistryService;
-import io.filternarrange.gateway.application.tier.TierResolver;
+import io.filternarrange.gateway.platform.plugin.PluginRegistryService;
+import io.filternarrange.gateway.platform.tier.TierResolver;
 import io.filternarrange.gateway.domain.tier.Tier;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
