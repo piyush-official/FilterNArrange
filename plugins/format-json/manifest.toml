@@ -1,0 +1,18 @@
+[plugin]
+id = "json"
+display_name = "JSON"
+version = "1.0.0"
+license = "Apache-2.0"
+author = "FilterNArrange Core"
+
+[detect]
+mime_types = ["application/json"]
+extensions = [".json"]
+magic_bytes = []
+confidence_strategy = "structural-sniff"
+
+[capabilities]
+parse = true
+emit = true
+streaming = false
+shape = "tabular"

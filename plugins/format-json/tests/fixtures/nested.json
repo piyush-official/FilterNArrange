@@ -1,0 +1,7 @@
+{
+  "company": "Acme",
+  "departments": [
+    {"name": "Eng", "size": 12},
+    {"name": "Ops", "size": 5}
+  ]
+}

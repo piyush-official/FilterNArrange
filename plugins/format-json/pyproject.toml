@@ -1,0 +1,20 @@
+[project]
+name = "filternarrange-format-json"
+version = "1.0.0"
+description = "JSON format plugin"
+requires-python = ">=3.12"
+license = { text = "Apache-2.0" }
+dependencies = ["filternarrange-engine"]
+
+[project.entry-points."filternarrange.formats"]
+json = "filternarrange_format_json:plugin"
+
+[project.optional-dependencies]
+dev = ["pytest==8.3.3", "pytest-asyncio==0.24.0"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
