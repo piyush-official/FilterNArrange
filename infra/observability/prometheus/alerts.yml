@@ -1,0 +1,41 @@
+groups:
+  - name: filternarrange-slos
+    interval: 30s
+    rules:
+      - alert: DetectionP95High
+        expr: histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{uri="/api/v1/detect"}[5m])) by (le)) > 0.5
+        for: 5m
+        labels: { severity: warning, slo: detect-p95 }
+        annotations:
+          summary: "Detection p95 > 500ms for 5m"
+          runbook: "docs/operations/incident-job-pipeline-stalled.md"
+
+      - alert: FilterPreviewP95High
+        expr: histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{uri="/api/v1/filter/preview"}[5m])) by (le)) > 1.0
+        for: 5m
+        labels: { severity: warning, slo: filter-preview-p95 }
+        annotations:
+          summary: "Filter preview p95 > 1s for 5m"
+
+      - alert: HighErrorRate
+        expr: sum(rate(http_server_requests_seconds_count{status=~"5.."}[5m])) / sum(rate(http_server_requests_seconds_count[5m])) > 0.05
+        for: 5m
+        labels: { severity: critical }
+        annotations:
+          summary: "Gateway 5xx rate > 5% over 5m"
+
+      - alert: CircuitBreakerOpen
+        expr: max(resilience4j_circuitbreaker_state{state="open"}) == 1
+        for: 1m
+        labels: { severity: critical }
+        annotations:
+          summary: "Resilience4j circuit breaker is OPEN"
+          runbook: "docs/operations/incident-circuit-breaker-open.md"
+
+      - alert: DiskHigh
+        expr: (1 - (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"})) > 0.80
+        for: 10m
+        labels: { severity: warning }
+        annotations:
+          summary: "Host disk > 80% on /"
+          runbook: "docs/operations/incident-disk-pressure.md"
