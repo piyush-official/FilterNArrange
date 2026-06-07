@@ -28,8 +28,11 @@ class ColumnFilterSpec(BaseModel):
 
 
 class FilterRequest(BaseModel):
+    """Plan C extends the filter contract to a generic dict so column / row /
+    expression / regex specs all flow through the same route. The dispatcher
+    validates per-kind."""
     ref: str
-    filter: ColumnFilterSpec
+    filter: dict[str, Any]
     sampleSize: int = 20
 
 
@@ -47,6 +50,18 @@ class ConvertRequest(BaseModel):
 
 class ConvertResponse(BaseModel):
     resultRef: str
+
+
+class AnalyzeRequest(BaseModel):
+    ref: str
+    analysis: dict[str, Any]
+    filter: dict[str, Any] | None = None
+
+
+class AnalyzeResponse(BaseModel):
+    kind: str
+    payload: dict[str, Any]
+    warnings: list[str]
 
 
 class ErrorEnvelope(BaseModel):

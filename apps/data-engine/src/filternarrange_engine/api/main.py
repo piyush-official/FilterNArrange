@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse
 
 from filternarrange_engine.adapters.plugin_registry.registry import PluginRegistry
 from filternarrange_engine.adapters.storage.minio_store import MinioObjectStore
+from filternarrange_engine.application.analysis_service import AnalysisService
 from filternarrange_engine.application.convert_service import ConvertService
 from filternarrange_engine.application.detect_service import DetectService
 from filternarrange_engine.application.filter_service import FilterService
@@ -13,6 +14,7 @@ from filternarrange_engine.platform.errors import EngineError
 from filternarrange_engine.platform.logging import configure_logging
 
 from .dependencies import trace_id_var
+from .routes_analysis import router as analysis_router
 from .routes_convert import router as convert_router
 from .routes_detect import router as detect_router
 from .routes_filter import router as filter_router
@@ -34,10 +36,12 @@ def build_app(store=None, registry: PluginRegistry | None = None,
     app.state.detect = DetectService(store, registry, settings)
     app.state.filter = FilterService(store, registry)
     app.state.convert = ConvertService(store, registry, settings)
+    app.state.analysis = AnalysisService(store, registry)
 
     app.include_router(detect_router)
     app.include_router(filter_router)
     app.include_router(convert_router)
+    app.include_router(analysis_router)
 
     @app.exception_handler(EngineError)
     async def engine_error_handler(request: Request, exc: EngineError):
@@ -54,7 +58,8 @@ def build_app(store=None, registry: PluginRegistry | None = None,
     @app.get("/healthz")
     def healthz():
         return {"status": "ok", "formats": registry.list_formats(),
-                "filters": registry.list_filters()}
+                "filters": registry.list_filters(),
+                "analyses": registry.list_analyses()}
 
     return app
 
