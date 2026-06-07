@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-package io.filternarrange.gateway.domain.tier;
+package io.filternarrange.gateway.platform.tier;
 
 import org.junit.jupiter.api.Test;
 
