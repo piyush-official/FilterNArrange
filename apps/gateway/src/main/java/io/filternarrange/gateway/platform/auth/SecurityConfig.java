@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 package io.filternarrange.gateway.platform.auth;
 
+import io.filternarrange.gateway.platform.web.FeatureGateFilter;
+import io.filternarrange.gateway.platform.web.IpRateLimitFilter;
+import io.filternarrange.gateway.platform.web.QuotaFilter;
+import io.filternarrange.gateway.platform.web.SizeLimitFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,7 +28,14 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthFilter jwt) throws Exception {
+    public SecurityFilterChain filterChain(
+        HttpSecurity http,
+        JwtAuthFilter jwt,
+        IpRateLimitFilter ipRateLimit,
+        SizeLimitFilter sizeLimit,
+        QuotaFilter quota,
+        FeatureGateFilter featureGate
+    ) throws Exception {
         http
             .csrf(c -> c.disable())
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -33,7 +44,14 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/auth/signup", "/api/v1/auth/login").permitAll()
                 .requestMatchers("/health", "/actuator/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .anyRequest().authenticated())
-            .addFilterBefore(jwt, UsernamePasswordAuthenticationFilter.class);
+            // Plan F §6 — tier filter chain.
+            // ipRateLimit runs before auth (covers signup/login).
+            // sizeLimit / quota / featureGate run after JWT auth has populated SecurityContext.
+            .addFilterBefore(ipRateLimit, UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(jwt, UsernamePasswordAuthenticationFilter.class)
+            .addFilterAfter(sizeLimit, JwtAuthFilter.class)
+            .addFilterAfter(quota, SizeLimitFilter.class)
+            .addFilterAfter(featureGate, QuotaFilter.class);
         return http.build();
     }
 }

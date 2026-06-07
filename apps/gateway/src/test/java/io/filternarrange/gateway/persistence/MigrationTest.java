@@ -82,4 +82,42 @@ class MigrationTest {
             Integer.class);
         assertThat(parts).isGreaterThanOrEqualTo(2);
     }
+
+    @Test
+    void subscriptionsTableExistsWithActiveUniquenessConstraint() {
+        Integer count = jdbc.queryForObject(
+            "select count(*) from information_schema.tables where table_name = 'subscriptions'",
+            Integer.class);
+        assertThat(count).isEqualTo(1);
+        java.util.List<String> idx = jdbc.queryForList(
+            "select indexname from pg_indexes where tablename = 'subscriptions'",
+            String.class);
+        assertThat(idx).contains("one_active_sub_per_user");
+    }
+
+    @Test
+    void formatRequestsRecipesPluginRegistryTablesExist() {
+        java.util.List<String> tables = jdbc.queryForList(
+            "select table_name from information_schema.tables "
+                + "where table_name in ('format_requests', 'recipes', 'plugin_registry')",
+            String.class);
+        assertThat(tables)
+            .contains("format_requests", "recipes", "plugin_registry");
+    }
+
+    @Test
+    void pluginRegistrySeededWithPaidEntries() {
+        java.util.List<String> paidIds = jdbc.queryForList(
+            "select plugin_id from plugin_registry where required_tier = 'paid' order by plugin_id",
+            String.class);
+        assertThat(paidIds).contains(
+            "ai-anomaly-detect",
+            "ai-auto-summary",
+            "ai-chart-suggest",
+            "ai-nl-to-filter",
+            "format-request-submit",
+            "job-batch-filter",
+            "recipe-crud"
+        );
+    }
 }
