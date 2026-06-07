@@ -10,7 +10,27 @@ tags:
   - name: detect
   - name: filter
   - name: convert
+  - name: health
 paths:
+  /health:
+    get:
+      tags: [health]
+      operationId: internalHealth
+      deprecated: true
+      description: |
+        Liveness probe — kept as a deprecated stub during the Plan A → Plan B
+        transition. Use the data-engine probe (`/healthz`) instead.
+        Scheduled for removal in Plan G.
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status: { type: string, example: UP }
   /detect:
     post:
       tags: [detect]
