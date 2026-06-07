@@ -1,10 +1,13 @@
-// SPDX-License-Identifier: Apache-2.0
-import type { ReactElement } from "react";
+import { BrowserRouter } from 'react-router-dom';
+import { AuthProvider } from './providers/AuthProvider';
+import { Router } from './router';
 
-export function App(): ReactElement {
+export function App() {
   return (
-    <main>
-      <h1>FilterNArrange — running</h1>
-    </main>
+    <BrowserRouter>
+      <AuthProvider>
+        <Router />
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
