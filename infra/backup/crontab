@@ -1,0 +1,4 @@
+# Plan G §T14 — nightly logical backup + MinIO mirror.
+# m h dom mon dow command
+30 2 * * * /usr/local/bin/backup.sh >> /proc/1/fd/1 2>&1
+0  3 * * * /usr/local/bin/mirror.sh  >> /proc/1/fd/1 2>&1
