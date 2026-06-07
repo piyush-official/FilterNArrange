@@ -1,0 +1,9 @@
+[plugin]
+id = "group_by"
+display_name = "Group-by aggregation"
+version = "0.1.0"
+license = "Apache-2.0"
+author = "FilterNArrange Core"
+
+[capabilities]
+kinds = ["group_by"]

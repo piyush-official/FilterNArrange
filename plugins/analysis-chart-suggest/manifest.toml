@@ -1,0 +1,9 @@
+[plugin]
+id = "chart_suggest"
+display_name = "Chart suggestion"
+version = "0.1.0"
+license = "Apache-2.0"
+author = "FilterNArrange Core"
+
+[capabilities]
+kinds = ["chart_suggest"]

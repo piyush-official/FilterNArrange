@@ -1,0 +1,9 @@
+[plugin]
+id = "summary_stats"
+display_name = "Summary statistics"
+version = "0.1.0"
+license = "Apache-2.0"
+author = "FilterNArrange Core"
+
+[capabilities]
+kinds = ["summary_stats"]
