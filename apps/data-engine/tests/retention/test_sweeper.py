@@ -69,13 +69,15 @@ def test_results_use_result_cutoff():
         result_free_hours=2, result_paid_days=1,
     )
     blobs = [
+        # alice (free) — 3h old, free cutoff is 2h → delete
         BlobRef(
             "results", "alice/r1.json",
             now - datetime.timedelta(hours=3), "alice"
         ),
+        # bob (paid) — 36h old, paid cutoff is 1 day (24h) → delete
         BlobRef(
             "results", "bob/r2.json",
-            now - datetime.timedelta(hours=18), "bob"
+            now - datetime.timedelta(hours=36), "bob"
         ),
     ]
     s = Sweeper(cfg, _Store(blobs), _Tiers({"alice": "free", "bob": "paid"}))
