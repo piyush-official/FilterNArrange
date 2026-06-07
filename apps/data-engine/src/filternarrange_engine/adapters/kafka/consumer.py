@@ -22,7 +22,7 @@ from filternarrange_engine.adapters.kafka.schema_validator import (
 from filternarrange_engine.adapters.kafka.topics import JOBS
 
 log = logging.getLogger(__name__)
-CONTRACTS = pathlib.Path(__file__).resolve().parents[5] / "contracts" / "kafka"
+CONTRACTS = pathlib.Path(__file__).resolve().parents[6] / "contracts" / "kafka"
 
 Handler = Callable[[Mapping[str, Any]], Awaitable[None]]
 

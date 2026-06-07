@@ -12,7 +12,7 @@ from filternarrange_engine.adapters.kafka.producer import JobResultsProducer
 from filternarrange_engine.adapters.kafka.topics import JOB_RESULTS
 from filternarrange_engine.application.heartbeat import Heartbeat
 from filternarrange_engine.platform import bulkheads
-from filternarrange_engine.platform.audit import audit_event_publish
+from filternarrange_engine.application.audit import audit_event_publish
 
 log = logging.getLogger(__name__)
 

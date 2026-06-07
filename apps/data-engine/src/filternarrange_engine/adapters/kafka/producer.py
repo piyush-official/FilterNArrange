@@ -14,7 +14,7 @@ from filternarrange_engine.adapters.kafka.schema_validator import (
 )
 
 log = logging.getLogger(__name__)
-CONTRACTS = pathlib.Path(__file__).resolve().parents[5] / "contracts" / "kafka"
+CONTRACTS = pathlib.Path(__file__).resolve().parents[6] / "contracts" / "kafka"
 
 
 class JobResultsProducer:

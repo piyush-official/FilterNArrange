@@ -7,7 +7,7 @@ from filternarrange_engine.adapters.kafka.schema_validator import (
 )
 
 CONTRACTS = (
-    pathlib.Path(__file__).resolve().parents[4] / "contracts" / "kafka"
+    pathlib.Path(__file__).resolve().parents[5] / "contracts" / "kafka"
 )
 
 
