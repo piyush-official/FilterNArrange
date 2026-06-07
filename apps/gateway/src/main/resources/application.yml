@@ -55,6 +55,14 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
 
+filternarrange:
+  tier:
+    # Plan F §5 — daily-ops / upload-MB caps. ``0`` means unlimited.
+    free-tier-max-upload-mb: ${FREE_TIER_MAX_UPLOAD_MB:5}
+    free-tier-daily-ops:     ${FREE_TIER_DAILY_OPS:100}
+    paid-tier-max-upload-mb: ${PAID_TIER_MAX_UPLOAD_MB:500}
+    paid-tier-daily-ops:     ${PAID_TIER_DAILY_OPS:0}
+
 resilience4j:
   circuitbreaker:
     instances:
