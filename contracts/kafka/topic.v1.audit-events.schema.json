@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://filternarrange.io/contracts/kafka/topic.v1.audit-events.schema.json",
+  "title": "topic.v1.audit-events",
+  "description": "Skeleton for audit-log events. Plan B fleshes out the action/target/metadata fields.",
+  "type": "object",
+  "required": ["event_id", "schema_version", "action"],
+  "properties": {
+    "event_id": { "type": "string", "format": "uuid" },
+    "schema_version": { "type": "string", "const": "v1" },
+    "action": { "type": "string" }
+  },
+  "additionalProperties": true
+}

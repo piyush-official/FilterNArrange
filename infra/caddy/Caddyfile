@@ -1,0 +1,25 @@
+{
+    # Auto self-signed local cert; flip to Let's Encrypt when public deploy lands (Plan H).
+    local_certs
+    auto_https disable_redirects
+}
+
+:8443 {
+    # API + WebSocket traffic → gateway
+    @api path /api/* /ws/* /health
+    handle @api {
+        reverse_proxy gateway:8080 {
+            header_up X-Forwarded-Proto https
+        }
+    }
+
+    # Everything else → frontend
+    handle {
+        reverse_proxy frontend:80
+    }
+
+    log {
+        output stdout
+        format console
+    }
+}

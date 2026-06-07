@@ -1,0 +1,10 @@
+extends: ["spectral:oas"]
+rules:
+  operation-tag-defined: error
+  operation-operationId: error
+  operation-success-response: error
+  oas3-unused-component: warn
+  # Downgraded — plan-dictated YAML does not include per-operation descriptions or info.contact/description
+  info-contact: info
+  info-description: info
+  operation-description: info

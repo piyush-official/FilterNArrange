@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://filternarrange.io/contracts/kafka/topic.v1.format-requests.schema.json",
+  "title": "topic.v1.format-requests",
+  "description": "Skeleton for format-request events. Plan B fleshes out user-submitted payload + sample reference.",
+  "type": "object",
+  "required": ["request_id", "schema_version"],
+  "properties": {
+    "request_id": { "type": "string", "format": "uuid" },
+    "schema_version": { "type": "string", "const": "v1" }
+  },
+  "additionalProperties": true
+}

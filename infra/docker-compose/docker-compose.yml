@@ -1,0 +1,275 @@
+# FilterNArrange — local dev compose stack.
+# All services on a single bridge network. Healthchecks on every service so
+# `docker compose up --wait` exits green only when the stack is actually ready.
+
+name: filternarrange
+
+x-restart: &restart
+  restart: unless-stopped
+
+services:
+  # ---------- Persistence ----------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    <<: *restart
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-filternarrange}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_DB: ${POSTGRES_DB:-filternarrange}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+    networks: [filternarrange]
+
+  redis:
+    # Valkey 7 — drop-in Redis-OSS fork with no SSPL drift risk (ADR-0001).
+    image: valkey/valkey:7-alpine
+    <<: *restart
+    command: ["valkey-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+    networks: [filternarrange]
+
+  redpanda:
+    image: redpandadata/redpanda:latest
+    <<: *restart
+    command:
+      - redpanda
+      - start
+      - --kafka-addr
+      - INTERNAL://0.0.0.0:9092,EXTERNAL://0.0.0.0:19092
+      - --advertise-kafka-addr
+      - INTERNAL://redpanda:9092,EXTERNAL://localhost:19092
+      - --rpc-addr
+      - redpanda:33145
+      - --advertise-rpc-addr
+      - redpanda:33145
+      - --mode
+      - dev-container
+      - --smp
+      - "1"
+      - --memory
+      - "1G"
+      - --reserve-memory
+      - "0M"
+      - --overprovisioned
+      - --node-id
+      - "0"
+    ports:
+      - "9092:9092"
+      - "19092:19092"
+      - "9644:9644"
+    volumes:
+      - redpanda-data:/var/lib/redpanda/data
+    healthcheck:
+      test: ["CMD", "rpk", "cluster", "health", "--exit-when-healthy"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+    networks: [filternarrange]
+
+  minio:
+    image: minio/minio:latest
+    <<: *restart
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-filternarrange}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-changeme}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    networks: [filternarrange]
+
+  # ---------- AI runtime -----------------------------------------------------
+  ollama:
+    image: ollama/ollama:latest
+    <<: *restart
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    healthcheck:
+      # `ollama list` exits 0 when the daemon is reachable, even with no models.
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
+    networks: [filternarrange]
+
+  ollama-init:
+    # One-shot job — pulls the default models, then exits. `docker compose up`
+    # treats this as completed-successfully via the `service_completed_successfully`
+    # condition used by downstream services that need the models present.
+    image: ollama/ollama:latest
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    entrypoint:
+      - sh
+      - -c
+      - |
+        set -e
+        echo "Pulling ${NL2FILTER_MODEL:-qwen2.5:7b}..."
+        ollama pull "${NL2FILTER_MODEL:-qwen2.5:7b}"
+        echo "Pulling ${SUMMARY_MODEL:-llama3.1:8b}..."
+        ollama pull "${SUMMARY_MODEL:-llama3.1:8b}"
+        echo "Default models present."
+    restart: "no"
+    networks: [filternarrange]
+
+  # ---------- Application services ------------------------------------------
+  gateway:
+    build:
+      context: ../../apps/gateway
+      dockerfile: Dockerfile
+    <<: *restart
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      redpanda:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-filternarrange}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_DB: ${POSTGRES_DB:-filternarrange}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      KAFKA_BOOTSTRAP: redpanda:9092
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-filternarrange}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-changeme}
+      AUTH_PROVIDER: ${AUTH_PROVIDER:-spring-jwt}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 20
+      start_period: 30s
+    networks: [filternarrange]
+
+  data-engine:
+    build:
+      context: ../../apps/data-engine
+      dockerfile: Dockerfile
+    <<: *restart
+    depends_on:
+      redis:
+        condition: service_healthy
+      redpanda:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+    environment:
+      DATA_ENGINE_MODE: ${DATA_ENGINE_MODE:-full}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      KAFKA_BOOTSTRAP: redpanda:9092
+      MINIO_ENDPOINT: http://minio:9000
+      OLLAMA_HOST: http://ollama:11434
+      NL2FILTER_MODEL: ${NL2FILTER_MODEL:-qwen2.5:7b}
+      SUMMARY_MODEL: ${SUMMARY_MODEL:-llama3.1:8b}
+      AI_TIMEOUT_SECONDS: ${AI_TIMEOUT_SECONDS:-30}
+      AI_MAX_CONCURRENT: ${AI_MAX_CONCURRENT:-4}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      FILTERNARRANGE_DISABLED_PLUGINS: ${FILTERNARRANGE_DISABLED_PLUGINS:-}
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 20
+      start_period: 20s
+    networks: [filternarrange]
+
+  frontend:
+    build:
+      context: ../../apps/frontend
+      dockerfile: Dockerfile
+    <<: *restart
+    depends_on:
+      gateway:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+    networks: [filternarrange]
+
+  caddy:
+    image: caddy:2-alpine
+    <<: *restart
+    depends_on:
+      frontend:
+        condition: service_healthy
+      gateway:
+        condition: service_healthy
+    ports:
+      - "8443:8443"
+    volumes:
+      - ../caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "--no-check-certificate", "https://localhost:8443/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+    networks: [filternarrange]
+
+# ---------- Volumes / networks ---------------------------------------------
+volumes:
+  postgres-data:
+  redis-data:
+  redpanda-data:
+  minio-data:
+  ollama-data:
+  caddy-data:
+  caddy-config:
+
+networks:
+  filternarrange:
+    name: filternarrange
+    driver: bridge

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Seeds dev data (admin user, default tier configs, sample fixtures) into the
+# running compose stack.
+#
+# In Plan A this is a placeholder — the users table doesn't yet exist. Plan B
+# replaces this body with real seeding logic.
+
+set -euo pipefail
+
+echo "[seed-dev] TODO: seed-dev runs after Plan B lands users table."
+exit 0

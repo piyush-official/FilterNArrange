@@ -1,0 +1,67 @@
+name: Bug report
+description: A reproducible defect in shipped behavior.
+title: "bug: <short summary>"
+labels: ["bug", "triaged"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Every required field below is enforced by CI on PRs that close this issue.
+
+  - type: input
+    id: requirement
+    attributes:
+      label: What should have happened
+      placeholder: e.g. detecting a UTF-16 CSV returns format=csv with confidence > 0.8
+    validations:
+      required: true
+
+  - type: input
+    id: actual
+    attributes:
+      label: What actually happened
+      placeholder: e.g. detect returns format=unknown
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction steps
+      description: Minimal steps. Attach a fixture if relevant (anonymize PII).
+      placeholder: |
+        1. POST /api/v1/detect with fixture utf16.csv
+        2. Observe response
+    validations:
+      required: true
+
+  - type: dropdown
+    id: blast_radius
+    attributes:
+      label: Blast radius
+      options:
+        - "Single user, single request"
+        - "All users of one tier"
+        - "All users"
+        - "Data-loss risk"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: regression_risk
+    attributes:
+      label: Regression risk
+      options:
+        - low
+        - medium
+        - high
+    validations:
+      required: true
+
+  - type: textarea
+    id: test_plan
+    attributes:
+      label: Test plan for the fix
+      description: A regression test that fails on `main` and passes on the fix is mandatory per ADR-0004.
+    validations:
+      required: true
