@@ -13,6 +13,7 @@ needed they can be removed safely.
 | `feat/plan-c-frontend`         | [#5](https://github.com/piyush-official/FilterNArrange/pull/5) | `2e76923` | 2026-06-07 |
 | `feat/plan-d-async-path`       | [#6](https://github.com/piyush-official/FilterNArrange/pull/6) | `93ec852` | 2026-06-07 |
 | `feat/plan-d-gateway-async`    | [#7](https://github.com/piyush-official/FilterNArrange/pull/7) | `b902500` | 2026-06-07 |
+| `feat/plan-d-worker-frontend-integration` | [#8](https://github.com/piyush-official/FilterNArrange/pull/8) | `7487e3c` | 2026-06-07 |
 
 ## How to delete them
 
@@ -28,6 +29,7 @@ git push origin --delete feat/plan-c-gateway-openapi-frontend
 git push origin --delete feat/plan-c-frontend
 git push origin --delete feat/plan-d-async-path
 git push origin --delete feat/plan-d-gateway-async
+git push origin --delete feat/plan-d-worker-frontend-integration
 
 # Delete local copies
 git branch -D feat/plan-a-foundation
@@ -37,6 +39,7 @@ git branch -D feat/plan-c-gateway-openapi-frontend
 git branch -D feat/plan-c-frontend
 git branch -D feat/plan-d-async-path
 git branch -D feat/plan-d-gateway-async
+git branch -D feat/plan-d-worker-frontend-integration
 
 # Drop this file once every branch in the table is gone
 git rm MERGED_BRANCHES.md
