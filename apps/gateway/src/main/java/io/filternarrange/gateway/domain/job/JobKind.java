@@ -4,7 +4,8 @@ package io.filternarrange.gateway.domain.job;
 public enum JobKind {
     BATCH_FILTER("batch-filter"),
     CONVERT("convert"),
-    ANALYZE("analyze");
+    ANALYZE("analyze"),
+    AI_ANOMALY_FULL("ai-anomaly-full");
 
     private final String wire;
 

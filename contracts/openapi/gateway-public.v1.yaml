@@ -13,6 +13,7 @@ tags:
   - name: pipeline
   - name: download
   - name: health
+  - name: ai
 paths:
   /health:
     get:
@@ -215,6 +216,153 @@ paths:
             Location:
               schema: { type: string }
         '404': { $ref: '#/components/responses/Error' }
+  /ai/nl-to-filter:
+    post:
+      tags: [ai]
+      summary: Translate a natural-language query to a FilterSpec
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ref, query]
+              properties:
+                ref:    { type: string }
+                query:  { type: string, maxLength: 2000 }
+                schema:
+                  type: array
+                  items: { type: object }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [filter_spec, confidence]
+                properties:
+                  filter_spec: { type: object }
+                  confidence:  { type: number, minimum: 0, maximum: 1 }
+        '404': { $ref: '#/components/responses/Error' }
+        '502': { $ref: '#/components/responses/Error' }
+        '504': { $ref: '#/components/responses/Error' }
+  /ai/summary:
+    post:
+      tags: [ai]
+      summary: Generate a plain-English auto-summary of a dataset
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ref, schema, sample_rows, total_rows, total_size_bytes]
+              properties:
+                ref:              { type: string }
+                schema:           { type: array, items: { type: object } }
+                sample_rows:      { type: array, items: { type: object }, maxItems: 50 }
+                total_rows:       { type: integer }
+                total_size_bytes: { type: integer }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [summary, key_observations]
+                properties:
+                  summary:          { type: string }
+                  key_observations: { type: array, items: { type: string } }
+        '404': { $ref: '#/components/responses/Error' }
+        '502': { $ref: '#/components/responses/Error' }
+        '504': { $ref: '#/components/responses/Error' }
+  /ai/chart-suggest:
+    post:
+      tags: [ai]
+      summary: Suggest a chart for the dataset
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ref, schema, cardinality_per_column]
+              properties:
+                ref:    { type: string }
+                schema: { type: array, items: { type: object } }
+                cardinality_per_column:
+                  type: object
+                  additionalProperties: { type: integer }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [recommended_chart]
+                properties:
+                  recommended_chart:
+                    type: object
+                    required: [kind, justification]
+                    properties:
+                      kind:
+                        type: string
+                        enum: [line, bar, pie, histogram, scatter, heatmap]
+                      x:             { type: string, nullable: true }
+                      y:             { type: string, nullable: true }
+                      color:         { type: string, nullable: true }
+                      justification: { type: string }
+        '404': { $ref: '#/components/responses/Error' }
+        '502': { $ref: '#/components/responses/Error' }
+        '504': { $ref: '#/components/responses/Error' }
+  /ai/anomaly:
+    post:
+      tags: [ai]
+      summary: Detect anomalies and data-quality issues
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ref, schema, sample_rows, summary_stats]
+              properties:
+                ref:           { type: string }
+                schema:        { type: array, items: { type: object } }
+                sample_rows:   { type: array, items: { type: object } }
+                summary_stats: { type: object }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [findings]
+                properties:
+                  findings:
+                    type: array
+                    items:
+                      type: object
+                      required: [kind, severity, description]
+                      properties:
+                        kind:
+                          type: string
+                          enum: [outlier, missing_values, format_inconsistency, possible_duplicate, type_drift]
+                        column:           { type: string, nullable: true }
+                        severity:         { type: string, enum: [low, medium, high] }
+                        description:      { type: string }
+                        suggested_action: { type: string, nullable: true }
+        '404': { $ref: '#/components/responses/Error' }
+        '502': { $ref: '#/components/responses/Error' }
+        '504': { $ref: '#/components/responses/Error' }
 components:
   securitySchemes:
     bearerAuth:
