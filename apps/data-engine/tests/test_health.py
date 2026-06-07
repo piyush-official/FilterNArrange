@@ -2,7 +2,6 @@
 """Health endpoint contract test."""
 
 from fastapi.testclient import TestClient
-
 from filternarrange_engine.api.main import app
 
 
