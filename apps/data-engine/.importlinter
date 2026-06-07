@@ -1,0 +1,23 @@
+[importlinter]
+root_packages =
+    filternarrange_engine
+
+[importlinter:contract:layered]
+name = Layered architecture
+type = layers
+layers =
+    filternarrange_engine.api
+    filternarrange_engine.application
+    filternarrange_engine.adapters
+    filternarrange_engine.platform
+    filternarrange_engine.core
+
+[importlinter:contract:core-isolation]
+name = core does not import adapters
+type = forbidden
+source_modules =
+    filternarrange_engine.core
+forbidden_modules =
+    filternarrange_engine.adapters
+    filternarrange_engine.api
+    filternarrange_engine.application
