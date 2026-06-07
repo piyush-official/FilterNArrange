@@ -1,0 +1,9 @@
+[plugin]
+id = "filter-expression"
+display_name = "Expression filter"
+version = "0.1.0"
+license = "Apache-2.0"
+author = "FilterNArrange Core"
+
+[capabilities]
+kinds = ["expression"]

@@ -1,0 +1,23 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "filternarrange-analysis-summary-stats"
+version = "0.1.0"
+description = "Per-column summary stats analysis plugin"
+requires-python = ">=3.12"
+license = { text = "Apache-2.0" }
+dependencies = ["filternarrange-engine"]
+
+[project.entry-points."filternarrange.analyses"]
+summary_stats = "filternarrange_analysis_summary_stats:plugin"
+
+[project.optional-dependencies]
+dev = ["pytest==8.3.3", "pytest-asyncio==0.24.0"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/filternarrange_analysis_summary_stats"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"

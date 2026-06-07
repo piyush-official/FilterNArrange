@@ -1,0 +1,9 @@
+[plugin]
+id = "filter-row"
+display_name = "Row predicate"
+version = "0.1.0"
+license = "Apache-2.0"
+author = "FilterNArrange Core"
+
+[capabilities]
+kinds = ["row"]

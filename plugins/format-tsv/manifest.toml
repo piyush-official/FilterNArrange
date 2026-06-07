@@ -1,0 +1,18 @@
+[plugin]
+id = "tsv"
+display_name = "TSV"
+version = "0.1.0"
+license = "Apache-2.0"
+author = "FilterNArrange Core"
+
+[detect]
+mime_types = ["text/tab-separated-values"]
+extensions = [".tsv"]
+magic_bytes = []
+confidence_strategy = "content-sniff"
+
+[capabilities]
+parse = true
+emit = true
+streaming = true
+shape = "tabular"

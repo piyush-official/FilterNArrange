@@ -81,11 +81,11 @@ jobs:
         run: |
           cd apps/data-engine
           uv sync --all-extras
-          # Install Plan B plugins editable into the same venv so the
-          # api/test_routes integration test (which imports them) collects.
-          uv pip install -e ../../plugins/format-csv
-          uv pip install -e ../../plugins/format-json
-          uv pip install -e ../../plugins/filter-column
+          # Install every plugins/* package editable so the dispatcher
+          # integration tests (which import each plugin directly) collect.
+          for p in ../../plugins/*/; do
+            uv pip install -e "$p"
+          done
           uv run pytest -v
       - name: Frontend tests
         run: |

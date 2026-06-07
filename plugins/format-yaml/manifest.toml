@@ -1,0 +1,18 @@
+[plugin]
+id = "yaml"
+display_name = "YAML"
+version = "0.1.0"
+license = "Apache-2.0"
+author = "FilterNArrange Core"
+
+[detect]
+mime_types = ["application/x-yaml", "text/yaml"]
+extensions = [".yaml", ".yml"]
+magic_bytes = []
+confidence_strategy = "structural-sniff"
+
+[capabilities]
+parse = true
+emit = true
+streaming = false
+shape = "tree"

@@ -1,0 +1,19 @@
+[plugin]
+id = "xlsx"
+display_name = "XLSX (Excel Workbook)"
+version = "0.1.0"
+license = "Apache-2.0"
+author = "FilterNArrange Core"
+
+[detect]
+mime_types = ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"]
+extensions = [".xlsx"]
+magic_bytes = ["PK"]
+confidence_strategy = "magic-byte"
+
+[capabilities]
+parse = true
+emit = true
+streaming = false
+shape = "tabular"
+multi_stream = true
