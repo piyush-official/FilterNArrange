@@ -19,6 +19,9 @@ create() {
 
 # Spec §5 — Kafka topics table
 create "topic.v1.jobs"            6 $((7 * 24 * 60 * 60 * 1000))
+# Plan F §T17 — tier-routed jobs topics. Same retention as the parent.
+create "topic.v1.jobs.paid"       6 $((7 * 24 * 60 * 60 * 1000))
+create "topic.v1.jobs.free"       6 $((7 * 24 * 60 * 60 * 1000))
 create "topic.v1.job-results"     6 $((24 * 60 * 60 * 1000))
 create "topic.v1.audit-events"    3 $((7 * 24 * 60 * 60 * 1000))
 create "topic.v1.format-requests" 3 $((30 * 24 * 60 * 60 * 1000))
