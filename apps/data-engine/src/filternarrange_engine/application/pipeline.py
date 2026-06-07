@@ -19,9 +19,14 @@ from typing import Any, Mapping
 log = logging.getLogger(__name__)
 
 _KIND_TO_PREFIX = {
-    "batch-filter": "filter",
-    "convert":      "convert",
-    "analyze":      "analyze",
+    "batch-filter":     "filter",
+    "convert":          "convert",
+    "analyze":          "analyze",
+    # Plan E §T19 — long-running anomaly scan. Real implementation streams the
+    # full dataset through AnomalyDetectCapability and writes findings to
+    # MinIO; for now the worker emits a deterministic result_ref so the
+    # gateway can persist it and the WS can broadcast completion.
+    "ai-anomaly-full":  "ai/anomaly",
 }
 
 
