@@ -219,6 +219,7 @@ paths:
   /ai/nl-to-filter:
     post:
       tags: [ai]
+      operationId: aiNlToFilter
       summary: Translate a natural-language query to a FilterSpec
       security: [{ bearerAuth: [] }]
       requestBody:
@@ -251,6 +252,7 @@ paths:
   /ai/summary:
     post:
       tags: [ai]
+      operationId: aiSummary
       summary: Generate a plain-English auto-summary of a dataset
       security: [{ bearerAuth: [] }]
       requestBody:
@@ -283,6 +285,7 @@ paths:
   /ai/chart-suggest:
     post:
       tags: [ai]
+      operationId: aiChartSuggest
       summary: Suggest a chart for the dataset
       security: [{ bearerAuth: [] }]
       requestBody:
@@ -324,6 +327,7 @@ paths:
   /ai/anomaly:
     post:
       tags: [ai]
+      operationId: aiAnomaly
       summary: Detect anomalies and data-quality issues
       security: [{ bearerAuth: [] }]
       requestBody:
