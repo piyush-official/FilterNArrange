@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Dropzone, DetectionPanel, useUpload } from '../features/upload';
+import { Dropzone, DetectionPanel, SheetPicker, useUpload } from '../features/upload';
 import {
   ColumnPicker, PreviewTable, useFilter,
   FilterModePicker, type FilterMode,
@@ -18,6 +18,7 @@ export function WorkbenchPage() {
   const up = useUpload();
   const columnNames = up.schema.map(c => c.name);
 
+  const [pickedSheet, setPickedSheet] = useState<string | null>(null);
   const [mode, setMode] = useState<FilterMode>('column');
   const [keep, setKeep] = useState<string[]>([]);
   const [rowSpec, setRowSpec] = useState<RowPredicate>({ col: '', op: 'eq', value: '' });
@@ -64,6 +65,9 @@ export function WorkbenchPage() {
       {up.error && <p role="alert">{up.error}</p>}
       {up.format && (
         <DetectionPanel format={up.format} confidence={up.confidence!} schema={up.schema} />
+      )}
+      {up.uploadId && up.format === 'xlsx' && (
+        <SheetPicker uploadId={up.uploadId} picked={pickedSheet} onPick={setPickedSheet} />
       )}
       {columnNames.length > 0 && (
         <>
