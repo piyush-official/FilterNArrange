@@ -18,6 +18,7 @@ from .routes_analysis import router as analysis_router
 from .routes_convert import router as convert_router
 from .routes_detect import router as detect_router
 from .routes_filter import router as filter_router
+from .routes_sheets import router as sheets_router
 
 
 def build_app(store=None, registry: PluginRegistry | None = None,
@@ -42,6 +43,7 @@ def build_app(store=None, registry: PluginRegistry | None = None,
     app.include_router(filter_router)
     app.include_router(convert_router)
     app.include_router(analysis_router)
+    app.include_router(sheets_router)
 
     @app.exception_handler(EngineError)
     async def engine_error_handler(request: Request, exc: EngineError):
