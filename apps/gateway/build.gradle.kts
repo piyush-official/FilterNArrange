@@ -46,6 +46,9 @@ dependencies {
     implementation("org.springframework.security:spring-security-oauth2-jose")
     // Plan G §T9 — Micrometer Prometheus registry exposes /actuator/prometheus.
     implementation("io.micrometer:micrometer-registry-prometheus")
+    // Plan G §T11 — JSON layout for logback (loaded only when SPRING_PROFILES_ACTIVE=prod).
+    runtimeOnly("ch.qos.logback.contrib:logback-json-classic:0.1.5")
+    runtimeOnly("ch.qos.logback.contrib:logback-jackson:0.1.5")
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("com.fasterxml.jackson.module:jackson-module-parameter-names")
     // networknt/json-schema-validator supports draft-2019-09 + 2020-12 natively;

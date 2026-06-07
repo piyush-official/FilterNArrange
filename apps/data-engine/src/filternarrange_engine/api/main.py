@@ -14,6 +14,7 @@ from filternarrange_engine.platform.errors import EngineError
 from filternarrange_engine.platform.logging import configure_logging
 
 from .dependencies import trace_id_var
+from .metrics_routes import router as metrics_router
 from .routes_analysis import router as analysis_router
 from .routes_convert import router as convert_router
 from .routes_detect import router as detect_router
@@ -44,6 +45,7 @@ def build_app(store=None, registry: PluginRegistry | None = None,
     app.include_router(convert_router)
     app.include_router(analysis_router)
     app.include_router(sheets_router)
+    app.include_router(metrics_router)
 
     @app.exception_handler(EngineError)
     async def engine_error_handler(request: Request, exc: EngineError):
