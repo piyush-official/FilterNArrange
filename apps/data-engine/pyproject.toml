@@ -17,6 +17,7 @@ dependencies = [
   "jsonschema>=4.22",
   "redis>=5.0",
   "psycopg[binary]>=3.2",
+  "prometheus-client>=0.20",
 ]
 
 [project.scripts]
