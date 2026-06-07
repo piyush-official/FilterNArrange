@@ -15,6 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.MinIOContainer;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -28,7 +32,16 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * {@link CallNotPermittedException}. WireMock impersonates a flapping data-engine.
  */
 @SpringBootTest
+@Testcontainers
 class CircuitBreakerIT {
+
+    @Container
+    static PostgreSQLContainer<?> POSTGRES =
+        new PostgreSQLContainer<>("postgres:16-alpine");
+
+    @Container
+    static MinIOContainer MINIO =
+        new MinIOContainer("minio/minio:RELEASE.2024-08-29T01-40-52Z");
 
     private static WireMockServer mock;
 
@@ -47,6 +60,12 @@ class CircuitBreakerIT {
 
     @DynamicPropertySource
     static void props(DynamicPropertyRegistry r) {
+        r.add("spring.datasource.url", POSTGRES::getJdbcUrl);
+        r.add("spring.datasource.username", POSTGRES::getUsername);
+        r.add("spring.datasource.password", POSTGRES::getPassword);
+        r.add("minio.endpoint", MINIO::getS3URL);
+        r.add("minio.access-key", MINIO::getUserName);
+        r.add("minio.secret-key", MINIO::getPassword);
         r.add("data-engine.base-url", () -> mock.baseUrl());
     }
 
