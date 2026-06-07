@@ -23,7 +23,7 @@ public class PipelineController {
     @PostMapping("/filter/preview")
     public EngineDtos.FilterResult preview(@Valid @RequestBody FilterPreviewRequest r) {
         int n = r.sampleSize() == null ? 20 : r.sampleSize();
-        return svc.filterPreview(CurrentUser.id(), r.uploadId(), r.filter().keep(), n);
+        return svc.filterPreview(CurrentUser.id(), r.uploadId(), r.filter(), n);
     }
 
     @PostMapping("/convert")

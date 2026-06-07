@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -29,13 +30,14 @@ public class PipelineService {
         return engine.detect(new EngineDtos.RefRequest(u.getRef()));
     }
 
+    /**
+     * Plan C: filter shape is a passthrough map so the gateway accepts
+     * column / row / expression / regex specs without code changes.
+     */
     public EngineDtos.FilterResult filterPreview(UUID userId, UUID uploadId,
-                                                 List<String> keep, int sampleSize) {
+                                                 Map<String, Object> filter, int sampleSize) {
         UploadRecordEntity u = uploads.require(uploadId, userId);
-        return engine.filter(new EngineDtos.FilterRequest(
-            u.getRef(),
-            new EngineDtos.ColumnFilterSpec("column", keep),
-            sampleSize));
+        return engine.preview(new EngineDtos.PreviewRequest(u.getRef(), filter, sampleSize));
     }
 
     public record Converted(UUID resultId, String ref) {}
@@ -49,5 +51,17 @@ public class PipelineService {
         UUID id = UUID.randomUUID();
         results.save(new ResultRecordEntity(id, userId, u.getId(), r.resultRef(), outputFormat, Instant.now()));
         return new Converted(id, r.resultRef());
+    }
+
+    public EngineDtos.AnalyzeResult analyze(UUID userId, UUID uploadId,
+                                            Map<String, Object> analysis,
+                                            Map<String, Object> filter) {
+        UploadRecordEntity u = uploads.require(uploadId, userId);
+        return engine.analyze(new EngineDtos.AnalyzeRequest(u.getRef(), analysis, filter));
+    }
+
+    public List<String> listSheets(UUID userId, UUID uploadId) {
+        UploadRecordEntity u = uploads.require(uploadId, userId);
+        return engine.sheets(new EngineDtos.SheetsRequest(u.getRef())).sheets();
     }
 }

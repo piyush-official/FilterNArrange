@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: FilterNArrange Gateway Public API
-  version: 1.0.0
+  version: 1.1.0
   description: REST surface consumed by the React frontend.
   license:
     name: Apache-2.0
@@ -155,6 +155,49 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/ConvertResponse' }
         '400': { $ref: '#/components/responses/Error' }
+  /analyze:
+    post:
+      tags: [pipeline]
+      operationId: analyze
+      security: [{ bearerAuth: [] }]
+      description: |
+        Run an analysis (summary stats, group-by, chart-suggest, schema-infer)
+        on an uploaded file. An optional filter step is applied before the
+        analysis. Added in 1.1.0.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AnalyzeRequest' }
+      responses:
+        '200':
+          description: analysis result
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AnalyzeResponse' }
+        '400': { $ref: '#/components/responses/Error' }
+        '422': { $ref: '#/components/responses/Error' }
+  /uploads/{id}/sheets:
+    get:
+      tags: [pipeline]
+      operationId: listSheets
+      security: [{ bearerAuth: [] }]
+      description: |
+        List sheet names in a multi-sheet upload (XLSX). 400 if the upload
+        is not multi-sheet-shaped. Added in 1.1.0.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: sheet names
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SheetsResponse' }
+        '400': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
   /download/{resultId}:
     get:
       tags: [download]
@@ -249,12 +292,60 @@ components:
         keep:
           type: array
           items: { type: string }
+    RowFilterPredicate:
+      type: object
+      required: [col, op]
+      properties:
+        col: { type: string }
+        op:
+          type: string
+          enum: [eq, ne, gt, gte, lt, lte, contains, starts_with, ends_with, regex, in, not_in, is_null, is_not_null]
+        value:
+          description: present for ops other than is_null / is_not_null
+    RowFilterSpec:
+      type: object
+      required: [kind, predicate]
+      properties:
+        kind: { type: string, enum: [row] }
+        predicate: { $ref: '#/components/schemas/RowFilterPredicate' }
+    ExpressionFilterSpec:
+      type: object
+      required: [kind, expr]
+      properties:
+        kind: { type: string, enum: [expression] }
+        expr:
+          type: string
+          description: SQL-ish expression with AND/OR/NOT and = / != / <,<=,>,>=
+    RegexFilterSpec:
+      type: object
+      required: [kind, pattern]
+      properties:
+        kind: { type: string, enum: [regex] }
+        pattern: { type: string }
+        flags:
+          type: array
+          items: { type: string, enum: [i, m, s] }
+          default: []
+    FilterSpec:
+      description: Added in 1.1.0 — discriminated union of the four filter kinds.
+      oneOf:
+        - $ref: '#/components/schemas/ColumnFilterSpec'
+        - $ref: '#/components/schemas/RowFilterSpec'
+        - $ref: '#/components/schemas/ExpressionFilterSpec'
+        - $ref: '#/components/schemas/RegexFilterSpec'
+      discriminator:
+        propertyName: kind
+        mapping:
+          column: '#/components/schemas/ColumnFilterSpec'
+          row: '#/components/schemas/RowFilterSpec'
+          expression: '#/components/schemas/ExpressionFilterSpec'
+          regex: '#/components/schemas/RegexFilterSpec'
     FilterPreviewRequest:
       type: object
       required: [uploadId, filter]
       properties:
         uploadId: { type: string, format: uuid }
-        filter: { $ref: '#/components/schemas/ColumnFilterSpec' }
+        filter: { $ref: '#/components/schemas/FilterSpec' }
         sampleSize: { type: integer, default: 20, minimum: 1, maximum: 500 }
     FilterPreviewResponse:
       type: object
@@ -283,6 +374,45 @@ components:
       properties:
         resultId: { type: string, format: uuid }
         ref: { type: string }
+    AnalysisSpec:
+      type: object
+      required: [kind]
+      properties:
+        kind:
+          type: string
+          enum: [summary_stats, group_by, chart_suggest, schema_infer]
+        options:
+          type: object
+          additionalProperties: true
+    AnalyzeRequest:
+      type: object
+      required: [uploadId, analysis]
+      properties:
+        uploadId: { type: string, format: uuid }
+        analysis: { $ref: '#/components/schemas/AnalysisSpec' }
+        filter:
+          allOf:
+            - $ref: '#/components/schemas/FilterSpec'
+          nullable: true
+          description: optional filter applied before analysis
+    AnalyzeResponse:
+      type: object
+      required: [kind, payload, warnings]
+      properties:
+        kind: { type: string }
+        payload:
+          type: object
+          additionalProperties: true
+        warnings:
+          type: array
+          items: { type: string }
+    SheetsResponse:
+      type: object
+      required: [sheets]
+      properties:
+        sheets:
+          type: array
+          items: { type: string }
     ErrorEnvelope:
       type: object
       required: [code, message, traceId]

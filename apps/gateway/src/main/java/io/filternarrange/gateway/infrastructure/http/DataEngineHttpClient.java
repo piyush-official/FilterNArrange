@@ -26,7 +26,7 @@ public class DataEngineHttpClient implements DataEngineClient {
 
     @CircuitBreaker(name = "dataEngine")
     @Override
-    public EngineDtos.FilterResult filter(EngineDtos.FilterRequest req) {
+    public EngineDtos.FilterResult preview(EngineDtos.PreviewRequest req) {
         return rest.post().uri("/filter").body(req).retrieve().body(EngineDtos.FilterResult.class);
     }
 
@@ -34,5 +34,17 @@ public class DataEngineHttpClient implements DataEngineClient {
     @Override
     public EngineDtos.ConvertResult convert(EngineDtos.ConvertRequest req) {
         return rest.post().uri("/convert").body(req).retrieve().body(EngineDtos.ConvertResult.class);
+    }
+
+    @CircuitBreaker(name = "dataEngine")
+    @Override
+    public EngineDtos.AnalyzeResult analyze(EngineDtos.AnalyzeRequest req) {
+        return rest.post().uri("/analyze").body(req).retrieve().body(EngineDtos.AnalyzeResult.class);
+    }
+
+    @CircuitBreaker(name = "dataEngine")
+    @Override
+    public EngineDtos.SheetsResult sheets(EngineDtos.SheetsRequest req) {
+        return rest.post().uri("/sheets").body(req).retrieve().body(EngineDtos.SheetsResult.class);
     }
 }

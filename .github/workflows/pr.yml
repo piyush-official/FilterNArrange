@@ -176,7 +176,71 @@ jobs:
         run: |
           echo "k6 latency budgets from spec §3 — wire in Plan B once /detect exists."
 
-  # ---- 9. PR template guard ------------------------------------------------
+  # ---- 9. plugin matrix + conformance --------------------------------------
+  # Discovers each plugins/* directory and runs that plugin's own tests in
+  # isolation (matrix). Then a separate conformance job installs every plugin
+  # + the engine core and runs the shared auto-discovered suite.
+  list-plugins:
+    name: list-plugins
+    runs-on: ubuntu-latest
+    needs: lint
+    outputs:
+      plugins: ${{ steps.find.outputs.plugins }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: find
+        run: |
+          PLUGINS=$(ls -d plugins/*/ | sed 's|plugins/||;s|/||' | jq -R . | jq -s -c .)
+          echo "plugins=$PLUGINS" >> "$GITHUB_OUTPUT"
+
+  plugin-tests:
+    name: plugin-tests (${{ matrix.plugin }})
+    runs-on: ubuntu-latest
+    needs: list-plugins
+    strategy:
+      fail-fast: false
+      matrix:
+        plugin: ${{ fromJSON(needs.list-plugins.outputs.plugins) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+        with:
+          python-version: "3.12"
+      - name: Install engine core
+        run: |
+          cd apps/data-engine
+          uv sync --all-extras
+      - name: Install plugin under test
+        run: |
+          cd apps/data-engine
+          uv pip install -e "../../plugins/${{ matrix.plugin }}"
+      - name: Run plugin tests
+        run: |
+          cd apps/data-engine
+          uv run pytest "../../plugins/${{ matrix.plugin }}/tests" -v
+
+  conformance:
+    name: plugin-conformance-suite
+    runs-on: ubuntu-latest
+    needs: plugin-tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+        with:
+          python-version: "3.12"
+      - name: Install engine + every plugin
+        run: |
+          cd apps/data-engine
+          uv sync --all-extras
+          for d in ../../plugins/*/; do
+            uv pip install -e "$d"
+          done
+      - name: Run shared conformance suite
+        run: |
+          cd apps/data-engine
+          uv run pytest ../../tests/integration/test_plugin_conformance.py -v
+
+  # ---- 10. PR template guard -----------------------------------------------
   pr-template-guard:
     name: pr-template-guard
     runs-on: ubuntu-latest

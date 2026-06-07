@@ -83,7 +83,7 @@ class PipelineControllerIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.format").value("csv"));
 
-        Mockito.when(engine.filter(Mockito.any())).thenReturn(
+        Mockito.when(engine.preview(Mockito.any())).thenReturn(
             new EngineDtos.FilterResult(
                 List.of(new EngineDtos.Column("name", "string", false)),
                 List.of(Map.of("name", "A"), Map.of("name", "B"))));
