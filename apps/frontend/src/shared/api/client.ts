@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import { OpenAPI } from './generated/core/OpenAPI';
 
 export function configureApi(token: string | null) {

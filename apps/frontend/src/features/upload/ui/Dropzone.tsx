@@ -5,7 +5,8 @@ interface Props { onSelect: (file: File) => void; }
 
 export function Dropzone({ onSelect }: Props) {
   const onDrop = useCallback((files: File[]) => {
-    if (files.length > 0) onSelect(files[0]);
+    const first = files[0];
+    if (first) onSelect(first);
   }, [onSelect]);
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop, multiple: false, accept: { 'text/csv': ['.csv'], 'application/json': ['.json'] },
