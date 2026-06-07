@@ -3,7 +3,7 @@ package io.filternarrange.gateway.infrastructure.messaging;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.filternarrange.gateway.api.ws.JobSubscriberRegistry;
+import io.filternarrange.gateway.platform.ws.JobSubscriberRegistry;
 import io.filternarrange.gateway.domain.job.Job;
 import io.filternarrange.gateway.domain.job.JobStatus;
 import io.filternarrange.gateway.infrastructure.persistence.JobRepository;

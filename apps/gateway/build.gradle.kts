@@ -39,7 +39,9 @@ dependencies {
     implementation("io.github.resilience4j:resilience4j-spring-boot3:2.2.0")
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("com.fasterxml.jackson.module:jackson-module-parameter-names")
-    implementation("com.github.erosb:everit-json-schema:1.14.4")
+    // networknt/json-schema-validator supports draft-2019-09 + 2020-12 natively;
+    // everit-json-schema stops at draft-07 and silently fails on our schemas.
+    implementation("com.networknt:json-schema-validator:1.5.2")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")

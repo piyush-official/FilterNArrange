@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package io.filternarrange.gateway.api.ws;
 
+import io.filternarrange.gateway.platform.ws.JobSubscriberRegistry;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketSession;

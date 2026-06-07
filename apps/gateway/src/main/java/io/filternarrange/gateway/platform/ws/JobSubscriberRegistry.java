@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-package io.filternarrange.gateway.api.ws;
+package io.filternarrange.gateway.platform.ws;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;

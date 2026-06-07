@@ -25,9 +25,10 @@ spring:
   kafka:
     bootstrap-servers: ${REDPANDA_BROKERS:redpanda:9092}
     listener:
-      # Plan D §6 — keep the consumers off in test / non-Kafka environments.
-      # Production / docker-compose runs override via the env var.
-      auto-startup: ${KAFKA_LISTENER_AUTOSTART:true}
+      # Plan D §6 — listeners default off so Spring-test contexts come up cleanly
+      # in environments without a broker. docker-compose / k8s deployments set
+      # KAFKA_LISTENER_AUTOSTART=true to enable the consumers.
+      auto-startup: ${KAFKA_LISTENER_AUTOSTART:false}
 
 auth:
   provider: ${AUTH_PROVIDER:spring-jwt}
