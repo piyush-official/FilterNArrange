@@ -5,6 +5,7 @@ import {
   FilterModePicker, type FilterMode,
   RowFilterForm, type RowPredicate,
   RegexFilterForm, type RegexFilterSpec,
+  ExpressionFilterEditor,
 } from '../features/filter';
 import { FormatChooser, DownloadButton, useDownload } from '../features/download';
 import { useAuth } from '../features/auth';
@@ -71,17 +72,11 @@ export function WorkbenchPage() {
             <RowFilterForm schema={up.schema} value={rowSpec} onChange={setRowSpec} />
           )}
           {mode === 'expression' && (
-            <label>
-              Expression:
-              <textarea
-                aria-label="expression-input"
-                rows={3}
-                style={{ width: '100%' }}
-                value={exprSpec.expr}
-                onChange={e => setExprSpec({ expr: e.target.value })}
-                placeholder="age > 18 AND country = 'IN'"
-              />
-            </label>
+            <ExpressionFilterEditor
+              schema={up.schema}
+              value={exprSpec}
+              onChange={setExprSpec}
+            />
           )}
           {mode === 'regex' && (
             <RegexFilterForm value={regexSpec} onChange={setRegexSpec} />
