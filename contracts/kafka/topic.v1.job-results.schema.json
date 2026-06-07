@@ -2,13 +2,26 @@
   "$schema": "https://json-schema.org/draft/2019-09/schema",
   "$id": "https://filternarrange.io/contracts/kafka/topic.v1.job-results.schema.json",
   "title": "topic.v1.job-results",
-  "description": "Skeleton for job-result events produced by the data-engine worker. Plan D adds the full payload.",
+  "description": "Job result and heartbeat events produced by the data-engine worker. Plan D §3.",
   "type": "object",
-  "required": ["job_id", "schema_version", "status"],
+  "required": ["job_id", "status", "finished_at", "trace_id"],
+  "additionalProperties": false,
   "properties": {
-    "job_id": { "type": "string", "format": "uuid" },
-    "schema_version": { "type": "string", "const": "v1" },
-    "status": { "type": "string", "enum": ["completed", "failed", "cancelled"] }
-  },
-  "additionalProperties": true
+    "job_id":      { "type": "string", "format": "uuid" },
+    "status":      { "type": "string", "enum": ["running", "completed", "failed", "cancelled"] },
+    "progress":    { "type": "number", "minimum": 0, "maximum": 100 },
+    "result_ref":  { "type": "string" },
+    "error": {
+      "type": "object",
+      "required": ["code", "message"],
+      "properties": {
+        "code":      { "type": "string" },
+        "plugin_id": { "type": "string" },
+        "message":   { "type": "string" },
+        "trace_id":  { "type": "string" }
+      }
+    },
+    "finished_at": { "type": "string", "format": "date-time" },
+    "trace_id":    { "type": "string", "minLength": 1, "maxLength": 128 }
+  }
 }

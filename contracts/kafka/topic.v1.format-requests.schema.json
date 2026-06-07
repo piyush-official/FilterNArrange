@@ -2,12 +2,17 @@
   "$schema": "https://json-schema.org/draft/2019-09/schema",
   "$id": "https://filternarrange.io/contracts/kafka/topic.v1.format-requests.schema.json",
   "title": "topic.v1.format-requests",
-  "description": "Skeleton for format-request events. Plan B fleshes out user-submitted payload + sample reference.",
+  "description": "User-submitted format-request events. Plan D ships the v1 shape; Plan F consumes the topic.",
   "type": "object",
-  "required": ["request_id", "schema_version"],
+  "required": ["request_id", "user_id", "sample_ref", "created_at", "trace_id"],
+  "additionalProperties": false,
   "properties": {
-    "request_id": { "type": "string", "format": "uuid" },
-    "schema_version": { "type": "string", "const": "v1" }
-  },
-  "additionalProperties": true
+    "request_id":  { "type": "string", "format": "uuid" },
+    "user_id":     { "type": "string", "format": "uuid" },
+    "sample_ref":  { "type": "string" },
+    "user_label":  { "type": "string", "maxLength": 256 },
+    "priority":    { "type": "integer", "minimum": 0, "maximum": 10 },
+    "created_at":  { "type": "string", "format": "date-time" },
+    "trace_id":    { "type": "string", "minLength": 1, "maxLength": 128 }
+  }
 }

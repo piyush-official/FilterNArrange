@@ -2,12 +2,17 @@
   "$schema": "https://json-schema.org/draft/2019-09/schema",
   "$id": "https://filternarrange.io/contracts/kafka/topic.v1.jobs.schema.json",
   "title": "topic.v1.jobs",
-  "description": "Skeleton for jobs produced by the gateway. Plan D adds the full payload (kind, user_id, params, idempotency_key, etc.).",
+  "description": "Job submission produced by the gateway and consumed by the worker. Plan D §3 async path.",
   "type": "object",
-  "required": ["job_id", "schema_version"],
+  "required": ["job_id", "user_id", "kind", "params", "priority", "created_at", "trace_id"],
+  "additionalProperties": false,
   "properties": {
-    "job_id": { "type": "string", "format": "uuid" },
-    "schema_version": { "type": "string", "const": "v1" }
-  },
-  "additionalProperties": true
+    "job_id":     { "type": "string", "format": "uuid" },
+    "user_id":    { "type": "string", "format": "uuid" },
+    "kind":       { "type": "string", "enum": ["batch-filter", "convert", "analyze"] },
+    "params":     { "type": "object" },
+    "priority":   { "type": "integer", "minimum": 0, "maximum": 10 },
+    "created_at": { "type": "string", "format": "date-time" },
+    "trace_id":   { "type": "string", "minLength": 1, "maxLength": 128 }
+  }
 }

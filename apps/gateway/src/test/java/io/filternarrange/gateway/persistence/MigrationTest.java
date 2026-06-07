@@ -53,4 +53,33 @@ class MigrationTest {
             Integer.class);
         assertThat(count).isEqualTo(1);
     }
+
+    @Test
+    void jobsTableExists() {
+        Integer count = jdbc.queryForObject(
+            "select count(*) from information_schema.tables where table_name = 'jobs'",
+            Integer.class);
+        assertThat(count).isEqualTo(1);
+    }
+
+    @Test
+    void jobsIndexesExist() {
+        java.util.List<String> idx = jdbc.queryForList(
+            "select indexname from pg_indexes where tablename = 'jobs'",
+            String.class);
+        assertThat(idx).contains("jobs_user_recent", "jobs_status_open");
+    }
+
+    @Test
+    void auditLogIsPartitioned() {
+        Integer partitioned = jdbc.queryForObject(
+            "select count(*) from pg_partitioned_table where partrelid = 'audit_log'::regclass",
+            Integer.class);
+        assertThat(partitioned).isEqualTo(1);
+
+        Integer parts = jdbc.queryForObject(
+            "select count(*) from pg_inherits where inhparent = 'audit_log'::regclass",
+            Integer.class);
+        assertThat(parts).isGreaterThanOrEqualTo(2);
+    }
 }
