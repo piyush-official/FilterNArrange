@@ -30,6 +30,21 @@ def _is_bool(v: str) -> bool:
     return isinstance(v, str) and v.strip().lower() in {"true", "false", "0", "1", "yes", "no"}
 
 
+def value_to_type_tag(v) -> TypeTag:
+    """Tightest TypeTag for a single Python value."""
+    if v is None:
+        return TypeTag.NULL
+    if isinstance(v, bool):
+        return TypeTag.BOOLEAN
+    if isinstance(v, int):
+        return TypeTag.INTEGER
+    if isinstance(v, float):
+        return TypeTag.NUMBER
+    if isinstance(v, str):
+        return TypeTag.STRING
+    return TypeTag.STRING
+
+
 def infer_type_tag(values: Iterable) -> TypeTag:
     """Infer the column type from a sample. Empty/None values are skipped."""
     cleaned = [v for v in values if v not in (None, "")]
@@ -45,4 +60,4 @@ def infer_type_tag(values: Iterable) -> TypeTag:
     return TypeTag.STRING
 
 
-__all__ = ["infer_type_tag"]
+__all__ = ["infer_type_tag", "value_to_type_tag"]
