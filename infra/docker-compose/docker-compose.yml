@@ -237,6 +237,37 @@ services:
       start_period: 20s
     networks: [filternarrange]
 
+  retention-worker:
+    # Plan F §T29 — Python retention sweeper. Same image as data-engine but
+    # overrides the entrypoint to run the CLI in --loop mode. Sweeps every
+    # RETENTION_INTERVAL_MINUTES (default 60) and exits cleanly on SIGTERM.
+    build:
+      context: ../../apps/data-engine
+      dockerfile: Dockerfile
+    <<: *restart
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-filternarrange}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_DB: ${POSTGRES_DB:-filternarrange}
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-filternarrange}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-changeme}
+      UPLOAD_RETENTION_FREE_HOURS: ${UPLOAD_RETENTION_FREE_HOURS:-24}
+      UPLOAD_RETENTION_PAID_DAYS: ${UPLOAD_RETENTION_PAID_DAYS:-30}
+      RESULT_RETENTION_FREE_HOURS: ${RESULT_RETENTION_FREE_HOURS:-24}
+      RESULT_RETENTION_PAID_DAYS: ${RESULT_RETENTION_PAID_DAYS:-30}
+      RETENTION_INTERVAL_MINUTES: ${RETENTION_INTERVAL_MINUTES:-60}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    command: ["retention-sweep", "--loop"]
+    networks: [filternarrange]
+
   frontend:
     build:
       context: ../../apps/frontend

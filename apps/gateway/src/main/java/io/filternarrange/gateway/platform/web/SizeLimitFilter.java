@@ -2,6 +2,7 @@
 package io.filternarrange.gateway.platform.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.filternarrange.gateway.infrastructure.messaging.AuditEventPublisher;
 import io.filternarrange.gateway.platform.tier.TierResolver;
 import io.filternarrange.gateway.domain.tier.Tier;
 import io.filternarrange.gateway.platform.tier.TierConfig;
@@ -9,6 +10,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -25,6 +28,7 @@ import java.util.UUID;
 public class SizeLimitFilter extends OncePerRequestFilter {
 
     private static final ObjectMapper JSON = new ObjectMapper();
+    private static final Logger log = LoggerFactory.getLogger(SizeLimitFilter.class);
     private static final Set<String> GUARDED_PATHS = Set.of(
         "/api/v1/uploads",
         "/api/v1/detect",
@@ -34,10 +38,14 @@ public class SizeLimitFilter extends OncePerRequestFilter {
 
     private final TierResolver tierResolver;
     private final TierConfig cfg;
+    private final AuditEventPublisher audit;
 
-    public SizeLimitFilter(TierResolver tierResolver, TierConfig cfg) {
+    public SizeLimitFilter(
+        TierResolver tierResolver, TierConfig cfg, AuditEventPublisher audit
+    ) {
         this.tierResolver = tierResolver;
         this.cfg = cfg;
+        this.audit = audit;
     }
 
     @Override
@@ -76,6 +84,21 @@ public class SizeLimitFilter extends OncePerRequestFilter {
                 "upgrade_hint", tier == Tier.FREE ? "/account/billing" : null
             );
             JSON.writeValue(res.getWriter(), body);
+            try {
+                audit.publish(
+                    userId,
+                    "tier-reject",
+                    req.getMethod() + " " + req.getRequestURI(),
+                    JSON.valueToTree(Map.of(
+                        "reason", "PAYLOAD_TOO_LARGE",
+                        "tier", tier.wireValue(),
+                        "size_bytes", len
+                    )),
+                    UUID.randomUUID().toString()
+                );
+            } catch (Exception e) {
+                log.warn("tier-reject audit emit failed: {}", e.toString());
+            }
             return;
         }
         chain.doFilter(req, res);
