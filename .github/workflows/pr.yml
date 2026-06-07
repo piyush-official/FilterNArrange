@@ -83,8 +83,8 @@ jobs:
           uv sync --all-extras
           # Install every plugins/* package editable so the dispatcher
           # integration tests (which import each plugin directly) collect.
-          for p in plugins/*/; do
-            uv pip install -e "../../$p"
+          for p in ../../plugins/*/; do
+            uv pip install -e "$p"
           done
           uv run pytest -v
       - name: Frontend tests
