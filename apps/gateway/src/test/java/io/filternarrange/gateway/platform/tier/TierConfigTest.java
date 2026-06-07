@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package io.filternarrange.gateway.platform.tier;
 
+import io.filternarrange.gateway.domain.tier.Subscription;
+import io.filternarrange.gateway.domain.tier.Tier;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
