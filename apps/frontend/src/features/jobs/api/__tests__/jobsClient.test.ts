@@ -14,7 +14,7 @@ describe('jobsClient', () => {
       }),
     );
     await submitJob({ kind: 'batch-filter', params: {} });
-    const init = fetchSpy.mock.calls[0][1] as RequestInit;
+    const init = fetchSpy.mock.calls[0]![1] as RequestInit;
     const headers = new Headers(init.headers as HeadersInit);
     expect(headers.get('Idempotency-Key')).toMatch(
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
@@ -38,7 +38,7 @@ describe('jobsClient', () => {
       new Response(JSON.stringify({ jobId: 'j-1', status: 'running' })),
     );
     await getJob('j-1');
-    const init = fetchSpy.mock.calls[0][1] as RequestInit;
+    const init = fetchSpy.mock.calls[0]![1] as RequestInit;
     const headers = new Headers(init.headers as HeadersInit);
     expect(headers.get('Authorization')).toBe('Bearer tok-xyz');
   });

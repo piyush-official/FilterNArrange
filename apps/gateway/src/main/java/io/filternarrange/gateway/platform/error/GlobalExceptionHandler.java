@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package io.filternarrange.gateway.platform.error;
 
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -11,6 +12,18 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler({ServiceDegradedException.class, CallNotPermittedException.class})
+    public ResponseEntity<ErrorEnvelope> degraded(Exception ex) {
+        // Plan D §6 — when the dataEngine circuit-breaker is open or the
+        // downstream returns a degraded marker, surface 503 to the caller
+        // so the frontend can fall back to the async path.
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+            .body(ErrorEnvelope.of(
+                "SERVICE_DEGRADED",
+                ex.getMessage() != null ? ex.getMessage() : "Downstream service unavailable",
+                TraceIdFilter.current()));
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorEnvelope> validation(MethodArgumentNotValidException ex) {
