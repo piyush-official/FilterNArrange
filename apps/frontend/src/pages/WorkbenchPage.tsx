@@ -8,7 +8,10 @@ import {
   ExpressionFilterEditor,
 } from '../features/filter';
 import { FormatChooser, DownloadButton, useDownload } from '../features/download';
+import { AnalysisTab } from '../features/analyze';
 import { useAuth } from '../features/auth';
+
+const TREE_FORMATS = new Set(['yaml', 'xml']);
 
 export function WorkbenchPage() {
   const { user, logout } = useAuth();
@@ -84,6 +87,13 @@ export function WorkbenchPage() {
           {flt.busy && <p>Filtering…</p>}
           {flt.error && <p role="alert">{flt.error}</p>}
           <PreviewTable columns={previewColumns} rows={flt.rows} />
+          {up.uploadId && (
+            <AnalysisTab
+              uploadId={up.uploadId}
+              shape={up.format && TREE_FORMATS.has(up.format) ? 'tree' : 'tabular'}
+              filter={filterSpec ?? undefined}
+            />
+          )}
           <FormatChooser value={fmt} onChange={setFmt} />
           <DownloadButton
             busy={dl.busy}
