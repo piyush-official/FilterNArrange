@@ -24,3 +24,19 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   - Plan G — Production hardening (Keycloak, observability stack, backup/DR, k6 perf gates, supply-chain security).
   - Plan H — Public deploy on Oracle Always-Free (multi-arch images, Caddy + LE, deploy.yml with rollback, ADR-0006, repo flip to public, v1.0.0 tag).
 - Plans index and cross-plan reconciliation notes at `docs/superpowers/plans/README.md`.
+- **Plan A — Foundation** executed (branch `feat/plan-a-foundation`):
+  - Monorepo skeleton: `apps/{gateway,data-engine,frontend}/`, `plugins/`, `contracts/{openapi,kafka}/`, `infra/{docker-compose,caddy,observability}/`, `scripts/`, `tests/integration/`, `.github/{workflows,ISSUE_TEMPLATE}/`. Each app has its own README documenting the hexagonal/feature-sliced layout. `.gitattributes` enforces LF line endings.
+  - **LICENSE**: Apache-2.0 adopted (full canonical text). `NOTICE` placeholder removed.
+  - **ADRs**: ADR-0002 (license — Apache-2.0), ADR-0003 (module dependency direction & 8 failure-isolation patterns), ADR-0004 (ticketing + versioning + CI workflow), `docs/decisions/README.md` index.
+  - **Gateway hello-world**: Spring Boot 3.2.5 + OpenJDK 21 (Gradle toolchain auto-provisioned via Foojay) with `/health` endpoint, JUnit 5 test, multi-stage Dockerfile (Eclipse Temurin), Gradle wrapper committed.
+  - **Data-engine hello-world**: FastAPI 0.111.0 on Python 3.12 (managed via `uv`) with `/health` endpoint, pytest contract test, multi-stage Dockerfile, `pyproject.toml` with ruff + mypy + pytest configs, `uv.lock`.
+  - **Frontend hello-world**: Vite 5 + React 18 + TypeScript 5.4 + Vitest, "FilterNArrange — running" banner, Testing-Library test, nginx-served multi-stage Dockerfile.
+  - **`.env.example`**: full configuration matrix from spec §8.6 (auth, Postgres, Redis, Redpanda, MinIO, Ollama, tiers, retention, observability, plugins, frontend).
+  - **Caddy reverse-proxy**: `infra/caddy/Caddyfile` routes `:8443` to gateway (API/WS/health) + frontend (everything else) with auto self-signed local certs.
+  - **Docker Compose stack**: `infra/docker-compose/docker-compose.yml` with 10 services (postgres:16, valkey:7, redpanda KRaft, minio, ollama + ollama-init one-shot, gateway, data-engine, frontend, caddy), healthchecks on every service, named volumes, single bridge network.
+  - **Scripts**: `scripts/wait-for-healthy.sh` polls `/health` endpoints with timeout; `scripts/seed-dev` placeholder for Plan B's user-table seeding.
+  - **Contracts scaffold**: `contracts/README.md` with versioning rules (immutable v1, additive v2); placeholder `gateway-public.v1.yaml` + `gateway-internal.v1.yaml` (OpenAPI 3.1 with `/health`); placeholder JSON Schemas for the four Kafka topics (jobs, job-results, format-requests, audit-events).
+  - **GitHub repo plumbing**: `.github/CODEOWNERS`, `.github/pull_request_template.md` (PR template enforced by CI), 5 issue templates (`bug`, `feature`, `format-request`, `plugin`, `chore`), `.github/ISSUE_TEMPLATE/config.yml` disabling blank issues and linking security advisories.
+  - **commitlint + husky**: root `package.json`, `commitlint.config.js` extending `@commitlint/config-conventional`, `.husky/commit-msg` hook validating Conventional Commit messages locally.
+  - **release-please**: `release-please-config.json` (simple release type, changelog sections per Conventional Commit) and `.release-please-manifest.json` starting at `0.0.0`.
+  - **CI workflows**: `.github/workflows/pr.yml` with all 9 stages from spec §7.5 (lint, unit-tests, architecture-tests, contract-validation with Spectral + ajv, plugin-conformance, integration-tests, e2e, performance-gates, pr-template-guard); `.github/workflows/release.yml` wiring `release-please-action`.
