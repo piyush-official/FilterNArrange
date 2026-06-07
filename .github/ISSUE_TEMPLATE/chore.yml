@@ -1,0 +1,47 @@
+name: Chore
+description: Non-functional work — refactor, dependency bump, infra tweak, docs.
+title: "chore: <short summary>"
+labels: ["chore", "triaged"]
+body:
+  - type: textarea
+    id: requirement
+    attributes:
+      label: What needs to change and why
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - gateway
+        - data-engine
+        - frontend
+        - plugins
+        - infra
+        - contracts
+        - docs
+        - tests
+        - ci
+    validations:
+      required: true
+
+  - type: dropdown
+    id: risk
+    attributes:
+      label: Regression risk
+      options:
+        - low
+        - medium
+        - high
+    validations:
+      required: true
+
+  - type: textarea
+    id: rollout
+    attributes:
+      label: Rollout / verification
+      description: How you'll prove the change is safe before merging.
+    validations:
+      required: true

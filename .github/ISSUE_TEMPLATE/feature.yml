@@ -1,0 +1,67 @@
+name: Feature request
+description: New behavior or capability.
+title: "feat: <short summary>"
+labels: ["feature", "triaged"]
+body:
+  - type: textarea
+    id: requirement
+    attributes:
+      label: Requirement
+      description: User-facing description of what this enables.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Specific, testable criteria. Use bullet points.
+      placeholder: |
+        - Detect endpoint returns confidence float between 0 and 1
+        - Confidence < 0.5 returns format=unknown
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope_in
+    attributes:
+      label: In scope
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope_out
+    attributes:
+      label: Out of scope (explicit YAGNI)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: tier
+    attributes:
+      label: Tier
+      options:
+        - free
+        - paid
+        - both
+    validations:
+      required: true
+
+  - type: dropdown
+    id: regression_risk
+    attributes:
+      label: Regression risk
+      options:
+        - low
+        - medium
+        - high
+    validations:
+      required: true
+
+  - type: textarea
+    id: test_plan
+    attributes:
+      label: Test plan
+      description: Unit + integration + (if user-facing) E2E coverage.
+    validations:
+      required: true

@@ -1,0 +1,60 @@
+name: Plugin proposal
+description: Propose a new filter, analysis, or AI-provider plugin.
+title: "plugin: <plugin name>"
+labels: ["feature", "area:plugins", "triaged"]
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Plugin kind
+      options:
+        - format
+        - filter
+        - analysis
+        - ai-provider
+        - storage
+    validations:
+      required: true
+
+  - type: input
+    id: plugin_id
+    attributes:
+      label: Plugin ID
+      description: Lowercase, hyphen-separated. Will become the `manifest.toml` `id`.
+      placeholder: e.g. geohash-distance
+    validations:
+      required: true
+
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Behavior
+      description: What the plugin does. Reference the relevant Protocol in spec §4 (FormatPlugin / FilterPlugin / AnalysisPlugin / LLMProvider).
+    validations:
+      required: true
+
+  - type: dropdown
+    id: tier
+    attributes:
+      label: Required tier
+      options:
+        - free
+        - paid
+    validations:
+      required: true
+
+  - type: textarea
+    id: api_version
+    attributes:
+      label: Targeted plugin API version
+      placeholder: e.g. plugin-api-v1
+    validations:
+      required: true
+
+  - type: textarea
+    id: test_plan
+    attributes:
+      label: Conformance test plan
+      description: How the canonical conformance suite will exercise this plugin.
+    validations:
+      required: true

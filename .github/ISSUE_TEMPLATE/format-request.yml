@@ -1,0 +1,57 @@
+name: Format request
+description: Request support for a new file format.
+title: "format-request: <format name>"
+labels: ["format-request", "triaged"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Two paths exist for new formats:
+        1. **Community PR** — fork, copy `plugins/format-csv` as a template, implement, open PR. Free.
+        2. **Maintainer-handled** — request prioritized work. Paid-tier users get priority.
+
+  - type: input
+    id: format_name
+    attributes:
+      label: Format name
+      placeholder: e.g. Parquet, Avro, Markdown table
+    validations:
+      required: true
+
+  - type: textarea
+    id: sample
+    attributes:
+      label: Sample data
+      description: Paste a small anonymized sample, or attach the file (the MinIO `format-samples` bucket holds it once triaged).
+    validations:
+      required: true
+
+  - type: dropdown
+    id: tier
+    attributes:
+      label: Your tier
+      options:
+        - free
+        - paid
+        - unsure
+    validations:
+      required: true
+
+  - type: dropdown
+    id: path
+    attributes:
+      label: Preferred path
+      options:
+        - "I will open a PR myself"
+        - "Please prioritize (paid)"
+        - "Either is fine"
+    validations:
+      required: true
+
+  - type: textarea
+    id: use_case
+    attributes:
+      label: Use case
+      description: Why you need this format supported.
+    validations:
+      required: true
