@@ -13,6 +13,8 @@ dependencies = [
   "python-multipart==0.0.10",
   "structlog==24.4.0",
   "typing-extensions>=4.12",
+  "aiokafka>=0.11",
+  "jsonschema>=4.22",
 ]
 
 [project.optional-dependencies]

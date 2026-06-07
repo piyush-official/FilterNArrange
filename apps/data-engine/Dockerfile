@@ -28,4 +28,8 @@ EXPOSE 8000
 HEALTHCHECK --interval=10s --timeout=3s --start-period=15s --retries=10 \
     CMD curl -fsS http://localhost:8000/health || exit 1
 
-ENTRYPOINT ["uvicorn", "filternarrange_engine.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Plan D §2: honour MODE at runtime. The Python entrypoint dispatches to
+# uvicorn (HTTP modes) or the worker loop (MODE=worker). Override MODE in
+# compose / k8s without changing this image.
+ENV MODE=full
+CMD ["python", "-m", "filternarrange_engine.main"]
