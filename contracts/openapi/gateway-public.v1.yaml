@@ -1,35 +1,272 @@
 openapi: 3.1.0
 info:
-  title: FilterNArrange gateway — public API
-  summary: Frontend-facing REST + WebSocket surface
+  title: FilterNArrange Gateway Public API
   version: 1.0.0
-  description: |
-    Public surface of the FilterNArrange gateway. Consumed by the React
-    frontend. Versioned per spec §3 (rule 4: explicit `/api/v1/...`).
+  description: REST surface consumed by the React frontend.
   license:
     name: Apache-2.0
-    url: https://www.apache.org/licenses/LICENSE-2.0
 servers:
-  - url: https://localhost:8443
-    description: Local dev (via Caddy)
+  - url: /api/v1
+tags:
+  - name: auth
+  - name: upload
+  - name: pipeline
+  - name: download
 paths:
-  /health:
-    get:
-      operationId: getHealth
-      summary: Liveness probe.
+  /auth/signup:
+    post:
+      tags: [auth]
+      operationId: signup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SignupRequest' }
       responses:
-        "200":
-          description: Service is up.
+        '200':
+          description: signed up
           content:
             application/json:
-              schema:
-                $ref: "#/components/schemas/HealthResponse"
+              schema: { $ref: '#/components/schemas/AuthResponse' }
+        '400': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+  /auth/login:
+    post:
+      tags: [auth]
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200':
+          description: logged in
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthResponse' }
+        '401': { $ref: '#/components/responses/Error' }
+  /auth/me:
+    get:
+      tags: [auth]
+      operationId: me
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: current user
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+        '401': { $ref: '#/components/responses/Error' }
+  /upload:
+    post:
+      tags: [upload]
+      operationId: upload
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: uploaded
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UploadResponse' }
+        '413': { $ref: '#/components/responses/Error' }
+        '401': { $ref: '#/components/responses/Error' }
+  /detect:
+    post:
+      tags: [pipeline]
+      operationId: detect
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DetectRequest' }
+      responses:
+        '200':
+          description: detected
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DetectResponse' }
+        '400': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+  /filter/preview:
+    post:
+      tags: [pipeline]
+      operationId: filterPreview
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FilterPreviewRequest' }
+      responses:
+        '200':
+          description: preview
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FilterPreviewResponse' }
+        '400': { $ref: '#/components/responses/Error' }
+  /convert:
+    post:
+      tags: [pipeline]
+      operationId: convert
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ConvertRequest' }
+      responses:
+        '200':
+          description: result-ready
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ConvertResponse' }
+        '400': { $ref: '#/components/responses/Error' }
+  /download/{resultId}:
+    get:
+      tags: [download]
+      operationId: download
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: resultId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '302':
+          description: redirect to pre-signed MinIO URL
+          headers:
+            Location:
+              schema: { type: string }
+        '404': { $ref: '#/components/responses/Error' }
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    Error:
+      description: structured error
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorEnvelope' }
   schemas:
-    HealthResponse:
+    SignupRequest:
       type: object
-      required: [status]
+      required: [email, password]
       properties:
-        status:
+        email: { type: string, format: email }
+        password: { type: string, minLength: 8 }
+        displayName: { type: string }
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string }
+    AuthResponse:
+      type: object
+      required: [token, user]
+      properties:
+        token: { type: string }
+        user: { $ref: '#/components/schemas/User' }
+    User:
+      type: object
+      required: [id, email]
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        displayName: { type: string, nullable: true }
+    UploadResponse:
+      type: object
+      required: [uploadId, ref, sizeBytes]
+      properties:
+        uploadId: { type: string, format: uuid }
+        ref: { type: string }
+        sizeBytes: { type: integer, format: int64 }
+    DetectRequest:
+      type: object
+      required: [uploadId]
+      properties:
+        uploadId: { type: string, format: uuid }
+    Column:
+      type: object
+      required: [name, type, nullable]
+      properties:
+        name: { type: string }
+        type:
           type: string
-          enum: [UP]
+          enum: [string, number, integer, boolean, datetime, "null"]
+        nullable: { type: boolean }
+    DetectResponse:
+      type: object
+      required: [format, confidence, schema]
+      properties:
+        format: { type: string }
+        confidence: { type: number, minimum: 0, maximum: 1 }
+        schema:
+          type: array
+          items: { $ref: '#/components/schemas/Column' }
+    ColumnFilterSpec:
+      type: object
+      required: [kind, keep]
+      properties:
+        kind: { type: string, enum: [column] }
+        keep:
+          type: array
+          items: { type: string }
+    FilterPreviewRequest:
+      type: object
+      required: [uploadId, filter]
+      properties:
+        uploadId: { type: string, format: uuid }
+        filter: { $ref: '#/components/schemas/ColumnFilterSpec' }
+        sampleSize: { type: integer, default: 20, minimum: 1, maximum: 500 }
+    FilterPreviewResponse:
+      type: object
+      required: [schema, rows]
+      properties:
+        schema:
+          type: array
+          items: { $ref: '#/components/schemas/Column' }
+        rows:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+    ConvertRequest:
+      type: object
+      required: [uploadId, filter, outputFormat]
+      properties:
+        uploadId: { type: string, format: uuid }
+        filter: { $ref: '#/components/schemas/ColumnFilterSpec' }
+        outputFormat:
+          type: string
+          enum: [csv, json]
+    ConvertResponse:
+      type: object
+      required: [resultId, ref]
+      properties:
+        resultId: { type: string, format: uuid }
+        ref: { type: string }
+    ErrorEnvelope:
+      type: object
+      required: [code, message, traceId]
+      properties:
+        code: { type: string }
+        pluginId: { type: string, nullable: true }
+        message: { type: string }
+        traceId: { type: string }

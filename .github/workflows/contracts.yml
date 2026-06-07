@@ -1,0 +1,29 @@
+name: contracts
+on:
+  pull_request:
+    paths:
+      - 'contracts/**'
+jobs:
+  oasdiff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Fetch base
+        run: git fetch origin "${{ github.base_ref }}":refs/remotes/origin/base
+      - name: Install oasdiff
+        run: |
+          curl -fsSL https://github.com/oasdiff/oasdiff/releases/download/v1.10.25/oasdiff_1.10.25_linux_amd64.tar.gz \
+            | tar -xz oasdiff
+          sudo mv oasdiff /usr/local/bin/
+      - name: Diff public
+        run: |
+          git show origin/base:contracts/openapi/gateway-public.v1.yaml > /tmp/base-public.yaml || exit 0
+          oasdiff breaking /tmp/base-public.yaml contracts/openapi/gateway-public.v1.yaml --fail-on ERR
+      - name: Diff internal
+        run: |
+          git show origin/base:contracts/openapi/gateway-internal.v1.yaml > /tmp/base-internal.yaml || exit 0
+          oasdiff breaking /tmp/base-internal.yaml contracts/openapi/gateway-internal.v1.yaml --fail-on ERR
+      - name: Spectral lint
+        run: bash contracts/openapi/tests/lint.sh
