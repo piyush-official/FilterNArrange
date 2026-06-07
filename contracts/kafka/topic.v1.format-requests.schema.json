@@ -1,5 +1,5 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
   "$id": "https://filternarrange.io/contracts/kafka/topic.v1.format-requests.schema.json",
   "title": "topic.v1.format-requests",
   "description": "Skeleton for format-request events. Plan B fleshes out user-submitted payload + sample reference.",

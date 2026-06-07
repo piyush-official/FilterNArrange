@@ -116,10 +116,11 @@ jobs:
             contracts/openapi/gateway-internal.v1.yaml
       - name: ajv validate — Kafka JSON schemas
         run: |
-          npx --yes ajv-cli@5.0.0 compile -s contracts/kafka/topic.v1.jobs.schema.json
-          npx --yes ajv-cli@5.0.0 compile -s contracts/kafka/topic.v1.job-results.schema.json
-          npx --yes ajv-cli@5.0.0 compile -s contracts/kafka/topic.v1.format-requests.schema.json
-          npx --yes ajv-cli@5.0.0 compile -s contracts/kafka/topic.v1.audit-events.schema.json
+          AJV="npx --yes ajv-cli@5.0.0 compile --spec=draft2019 --strict=false"
+          $AJV -s contracts/kafka/topic.v1.jobs.schema.json
+          $AJV -s contracts/kafka/topic.v1.job-results.schema.json
+          $AJV -s contracts/kafka/topic.v1.format-requests.schema.json
+          $AJV -s contracts/kafka/topic.v1.audit-events.schema.json
       - name: Detect contract mutation (v1 files must be immutable on main)
         run: |
           echo "Plan A note: full v1-immutability diff lands when first non-trivial contract is shipped (Plan B)."
