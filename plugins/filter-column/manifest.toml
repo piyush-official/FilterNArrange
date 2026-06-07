@@ -1,0 +1,9 @@
+[plugin]
+id = "filter-column"
+display_name = "Column projection"
+version = "1.0.0"
+license = "Apache-2.0"
+author = "FilterNArrange Core"
+
+[capabilities]
+kinds = ["column"]
