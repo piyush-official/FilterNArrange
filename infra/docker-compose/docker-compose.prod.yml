@@ -1,0 +1,178 @@
+# Plan H §T2 — production overlay for Oracle Always-Free (4 vCPU ARM Ampere / 24 GB).
+#
+# Usage:
+#   docker compose \
+#     -f infra/docker-compose/docker-compose.yml \
+#     -f infra/docker-compose/docker-compose.prod.yml \
+#     --env-file /etc/filternarrange/prod.env \
+#     up -d
+#
+# Memory budget at full load (24 GB Ampere A1):
+#   gateway 1.5 + data-engine 2 + retention 0.5 + frontend 0.1 + caddy 0.25 +
+#   ollama 8 + postgres 2 + redis 0.5 + redpanda 1.5 + minio 0.5 = ~16.85 GB
+#   Headroom for OS/buffer: ~7 GB.
+
+name: filternarrange
+
+services:
+  gateway:
+    image: ghcr.io/piyush-official/filternarrange/gateway:${FNA_VERSION:?must set FNA_VERSION}
+    build: !reset null
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      # spring-jwt saves ~1 GB vs keycloak; switch back if you've completed
+      # the Keycloak rollout from Plan G PR-1 follow-ups
+      AUTH_PROVIDER: ${AUTH_PROVIDER:-spring-jwt}
+      JWT_SECRET: ${JWT_SECRET:?}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:?}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+      POSTGRES_DB: ${POSTGRES_DB:-filternarrange}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      KAFKA_BOOTSTRAP: redpanda:9092
+      REDPANDA_BROKERS: redpanda:9092
+      KAFKA_LISTENER_AUTOSTART: "true"
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:?}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:?}
+      PUBLIC_BASE_URL: https://${PUBLIC_HOST:?}
+      JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=70
+    ports: !reset []
+    expose: ["8080"]
+    deploy:
+      resources:
+        limits:
+          memory: 1500m
+          cpus: "1.0"
+    restart: unless-stopped
+
+  data-engine:
+    image: ghcr.io/piyush-official/filternarrange/data-engine:${FNA_VERSION:?}
+    build: !reset null
+    environment:
+      DATA_ENGINE_MODE: full
+      NL2FILTER_MODEL: ${NL2FILTER_MODEL:-qwen2.5:3b}
+      SUMMARY_MODEL: ${SUMMARY_MODEL:-llama3.1:8b}
+      OLLAMA_HOST: http://ollama:11434
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      KAFKA_BOOTSTRAP: redpanda:9092
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:?}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:?}
+      AI_TIMEOUT_SECONDS: ${AI_TIMEOUT_SECONDS:-30}
+      AI_MAX_CONCURRENT: ${AI_MAX_CONCURRENT:-4}
+    ports: !reset []
+    expose: ["8000"]
+    deploy:
+      resources:
+        limits:
+          memory: 2g
+          cpus: "1.0"
+    restart: unless-stopped
+
+  retention-worker:
+    image: ghcr.io/piyush-official/filternarrange/data-engine:${FNA_VERSION:?}
+    build: !reset null
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+          cpus: "0.5"
+    restart: unless-stopped
+
+  frontend:
+    image: ghcr.io/piyush-official/filternarrange/frontend:${FNA_VERSION:?}
+    build: !reset null
+    environment:
+      VITE_API_BASE: https://${PUBLIC_HOST:?}/api/v1
+    ports: !reset []
+    expose: ["80"]
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+          cpus: "0.25"
+    restart: unless-stopped
+
+  caddy:
+    image: ghcr.io/piyush-official/filternarrange/caddy:${FNA_VERSION:?}
+    build: !reset null
+    environment:
+      PUBLIC_HOST: ${PUBLIC_HOST:?}
+      ACME_EMAIL: ${ACME_EMAIL:?}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/lib/filternarrange/caddy-data:/data
+      - /var/lib/filternarrange/caddy-config:/config
+      - ../caddy/Caddyfile.prod:/etc/caddy/Caddyfile:ro
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+          cpus: "0.25"
+    restart: unless-stopped
+
+  ollama:
+    environment:
+      OLLAMA_KEEP_ALIVE: 5m
+      OLLAMA_MAX_LOADED_MODELS: "1"
+    ports: !reset []
+    expose: ["11434"]
+    volumes:
+      - /var/lib/filternarrange/ollama:/root/.ollama
+    deploy:
+      resources:
+        limits:
+          memory: 8g
+          cpus: "2.0"
+    restart: unless-stopped
+
+  postgres:
+    ports: !reset []
+    volumes:
+      - /var/lib/filternarrange/postgres:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          memory: 2g
+          cpus: "1.0"
+    restart: unless-stopped
+
+  redis:
+    ports: !reset []
+    volumes:
+      - /var/lib/filternarrange/redis:/data
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+          cpus: "0.25"
+    restart: unless-stopped
+
+  redpanda:
+    ports: !reset []
+    volumes:
+      - /var/lib/filternarrange/redpanda:/var/lib/redpanda/data
+    deploy:
+      resources:
+        limits:
+          memory: 1500m
+          cpus: "0.5"
+    restart: unless-stopped
+
+  minio:
+    ports: !reset []
+    expose: ["9000", "9001"]
+    volumes:
+      - /var/lib/filternarrange/minio:/data
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+          cpus: "0.25"
+    restart: unless-stopped
