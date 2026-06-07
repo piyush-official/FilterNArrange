@@ -15,12 +15,37 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from typing import Any
 
+from fastapi import FastAPI
+
+from filternarrange_engine.api.ai_routes import build_ai_router
+from filternarrange_engine.api.main import build_app
 from filternarrange_engine.application.worker import run_worker
 from filternarrange_engine.platform.mode import Mode, serves_http, serves_worker
 
 
 log = logging.getLogger(__name__)
+
+
+def create_app(
+    *,
+    orchestrator_override: Any | None = None,
+    enabled_names: set[str] | None = None,
+) -> FastAPI:
+    """Build the FastAPI app and attach the Plan E AI surface.
+
+    Tests pass ``orchestrator_override`` + ``enabled_names`` so the AI routes
+    can be exercised without bringing up Ollama / Redis. Production boot wires
+    a real orchestrator in the lifespan handler (see ``main()`` below).
+    """
+    app = build_app()
+    names = set(enabled_names or set())
+    app.include_router(
+        build_ai_router(orchestrator_override, enabled_names=names),
+        prefix="/ai",
+    )
+    return app
 
 
 def main() -> None:

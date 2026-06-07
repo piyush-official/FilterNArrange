@@ -1,0 +1,11 @@
+[plugin]
+id = "anomaly_detect"
+display_name = "AI: Anomaly & Data-Quality Detection"
+version = "1.0.0"
+license = "Apache-2.0"
+author = "FilterNArrange Core"
+kind = "ai_capability"
+
+[ai]
+required_tier = "free"
+default_model_setting = "anomaly_detect"

@@ -1,0 +1,11 @@
+[plugin]
+id = "chart_suggest"
+display_name = "AI: Chart Suggestion"
+version = "1.0.0"
+license = "Apache-2.0"
+author = "FilterNArrange Core"
+kind = "ai_capability"
+
+[ai]
+required_tier = "free"
+default_model_setting = "chart_suggest"

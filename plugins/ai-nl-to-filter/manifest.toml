@@ -1,0 +1,11 @@
+[plugin]
+id = "nl_to_filter"
+display_name = "AI: Natural-Language to Filter"
+version = "1.0.0"
+license = "Apache-2.0"
+author = "FilterNArrange Core"
+kind = "ai_capability"
+
+[ai]
+required_tier = "free"
+default_model_setting = "nl_to_filter"
