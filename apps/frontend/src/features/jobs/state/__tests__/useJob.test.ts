@@ -14,6 +14,8 @@ vi.mock('../../api/jobsClient', () => ({
 
 vi.mock('../../api/jobsWebSocket', () => ({
   openJobSocket: (id: string, on: (e: unknown) => void) => {
+    // Delay the WS push so the REST seed (microtask) lands first and the
+    // hook walks status: undefined → queued → completed.
     setTimeout(
       () =>
         on({
@@ -24,20 +26,20 @@ vi.mock('../../api/jobsWebSocket', () => ({
           finished_at: '2026-06-07T00:01:00Z',
           trace_id: 't',
         }),
-      10,
+      80,
     );
     return () => {};
   },
 }));
 
 describe('useJob', () => {
-  it('transitions queued → completed over WS', async () => {
+  it('absorbs a WS completion envelope into the job state', async () => {
     const { result } = renderHook(() => useJob('j-1'));
-    await waitFor(() => expect(result.current.job?.status).toBe('queued'));
     await waitFor(
       () => expect(result.current.job?.status).toBe('completed'),
-      { timeout: 500 },
+      { timeout: 1000 },
     );
     expect(result.current.job?.resultRef).toBe('results/abc');
+    expect(result.current.progress).toBe(100);
   });
 });

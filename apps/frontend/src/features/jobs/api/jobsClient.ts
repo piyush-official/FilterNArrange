@@ -1,4 +1,4 @@
-import { authHeaders, newIdempotencyKey } from '@/shared/api/client';
+import { authHeaders, newIdempotencyKey } from '../../../shared/api/client';
 
 export type JobStatus = 'queued' | 'running' | 'completed' | 'failed' | 'cancelled';
 
