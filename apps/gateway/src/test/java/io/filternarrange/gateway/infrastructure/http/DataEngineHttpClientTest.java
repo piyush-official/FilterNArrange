@@ -43,14 +43,14 @@ class DataEngineHttpClientTest {
     }
 
     @Test
-    void filter_callsEngine() {
+    void preview_callsEngine() {
         server.expect(requestTo("http://data-engine:8000/filter"))
             .andRespond(withSuccess("""
                 {"schema":[{"name":"a","type":"string","nullable":false}],"rows":[{"a":"1"}]}
                 """, MediaType.APPLICATION_JSON));
-        var res = client.filter(new EngineDtos.FilterRequest(
+        var res = client.preview(new EngineDtos.PreviewRequest(
             "uploads/u/abc.csv",
-            new EngineDtos.ColumnFilterSpec("column", List.of("a")),
+            Map.of("kind", "column", "keep", List.of("a")),
             20));
         assertThat(res.rows()).hasSize(1);
         assertThat(res.rows().get(0)).containsEntry("a", "1");

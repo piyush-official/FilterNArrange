@@ -1,9 +1,1 @@
-# Per-check severity overrides for oasdiff.
-#
-# request-property-type-changed: downgrade to "warn".
-# oasdiff cannot recognise that widening a typed property to a oneOf
-# union that contains the original type stays valid for existing
-# callers (it's the literal definition of a non-breaking widening).
-# Plan C T16 widens FilterPreviewRequest.filter from ColumnFilterSpec
-# to FilterSpec. Column-shape requests still match the new union.
-request-property-type-changed: warn
+request-property-type-changed warn
