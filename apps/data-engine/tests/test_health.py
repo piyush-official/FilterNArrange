@@ -2,12 +2,21 @@
 """Health endpoint contract test."""
 
 from fastapi.testclient import TestClient
+<<<<<<< HEAD
 from filternarrange_engine.api.main import app
+=======
+
+from filternarrange_engine.api.main import build_app
+from filternarrange_engine.adapters.plugin_registry.registry import PluginRegistry
+>>>>>>> e3cf1cb (feat(data-engine): FastAPI routers + detect/filter/convert services)
 
 
-def test_health_returns_up() -> None:
+def test_healthz_returns_ok() -> None:
+    app = build_app(store=object(), registry=PluginRegistry())
     client = TestClient(app)
-    response = client.get("/health")
+    response = client.get("/healthz")
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("application/json")
-    assert response.json() == {"status": "UP"}
+    body = response.json()
+    assert body["status"] == "ok"
+    assert "formats" in body and "filters" in body
