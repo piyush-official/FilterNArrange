@@ -20,18 +20,18 @@ jobs:
       - name: Diff public
         run: |
           git show origin/base:contracts/openapi/gateway-public.v1.yaml > /tmp/base-public.yaml || exit 0
-          # request-property-type-changed: oasdiff can't recognise that
-          # widening a typed property to a oneOf union containing the
-          # original type stays valid for existing callers. Reviewed
-          # manually for Plan C T16; downgrade this check to a warning.
+          # Severity overrides live in contracts/openapi/oasdiff-severity.yaml.
+          # request-property-type-changed is downgraded to warn because oasdiff
+          # can't recognise oneOf widening (the original type is a union member)
+          # as non-breaking. Reviewed manually for Plan C T16.
           oasdiff breaking /tmp/base-public.yaml contracts/openapi/gateway-public.v1.yaml \
             --fail-on ERR \
-            --exclude-checks request-property-type-changed
+            --severity-levels contracts/openapi/oasdiff-severity.yaml
       - name: Diff internal
         run: |
           git show origin/base:contracts/openapi/gateway-internal.v1.yaml > /tmp/base-internal.yaml || exit 0
           oasdiff breaking /tmp/base-internal.yaml contracts/openapi/gateway-internal.v1.yaml \
             --fail-on ERR \
-            --exclude-checks request-property-type-changed
+            --severity-levels contracts/openapi/oasdiff-severity.yaml
       - name: Spectral lint
         run: bash contracts/openapi/tests/lint.sh
