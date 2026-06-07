@@ -12,11 +12,14 @@ java { toolchain { languageVersion.set(JavaLanguageVersion.of(21)) } }
 
 repositories { mavenCentral() }
 
-// Plan D §3 — schemas in contracts/kafka land on the runtime classpath so
-// JsonSchemaValidator can load them as resources at /contracts/kafka/*.
+// Plan D §3 — Kafka schemas live at <repo>/contracts/kafka/*.schema.json. Adding
+// <repo>/contracts as a resource srcDir copies them to the runtime classpath at
+// /kafka/*.schema.json. The gateway is its own Gradle root (settings.gradle.kts
+// here sets rootProject.name="gateway"), so rootProject.file(..) would resolve
+// to apps/gateway/contracts — we hop up two levels with a relative path instead.
 sourceSets {
     named("main") {
-        resources.srcDir(rootProject.file("contracts"))
+        resources.srcDir(layout.projectDirectory.dir("../../contracts"))
     }
 }
 

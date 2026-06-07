@@ -7,6 +7,7 @@ import io.filternarrange.gateway.infrastructure.persistence.AuditLogRepository;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,10 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Component
+@ConditionalOnProperty(
+    name = "spring.kafka.listener.auto-startup",
+    havingValue = "true",
+    matchIfMissing = false)
 public class AuditEventsConsumer {
 
     private static final Logger log = LoggerFactory.getLogger(AuditEventsConsumer.class);
