@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: FilterNArrange Gateway → Data-engine Internal API
-  version: 1.0.0
+  version: 1.1.0
   license:
     name: Apache-2.0
 servers:
@@ -10,6 +10,8 @@ tags:
   - name: detect
   - name: filter
   - name: convert
+  - name: analyze
+  - name: sheets
   - name: health
 paths:
   /health:
@@ -82,6 +84,42 @@ paths:
               schema: { $ref: '#/components/schemas/ConvertResult' }
         '4XX': { $ref: '#/components/responses/Error' }
         '5XX': { $ref: '#/components/responses/Error' }
+  /analyze:
+    post:
+      tags: [analyze]
+      operationId: engineAnalyze
+      description: Added in 1.1.0 — runs an analysis plugin against an upload, with an optional filter step.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AnalyzeRequest' }
+      responses:
+        '200':
+          description: analysis result
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AnalyzeResult' }
+        '4XX': { $ref: '#/components/responses/Error' }
+        '5XX': { $ref: '#/components/responses/Error' }
+  /sheets:
+    post:
+      tags: [sheets]
+      operationId: engineSheets
+      description: Added in 1.1.0 — returns the sheet names for a multi-sheet XLSX upload.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SheetsRequest' }
+      responses:
+        '200':
+          description: sheet names
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SheetsResult' }
+        '4XX': { $ref: '#/components/responses/Error' }
+        '5XX': { $ref: '#/components/responses/Error' }
 components:
   responses:
     Error:
@@ -121,12 +159,57 @@ components:
         keep:
           type: array
           items: { type: string }
+    RowFilterPredicate:
+      type: object
+      required: [col, op]
+      properties:
+        col: { type: string }
+        op:
+          type: string
+          enum: [eq, ne, gt, gte, lt, lte, contains, starts_with, ends_with, regex, in, not_in, is_null, is_not_null]
+        value: {}
+    RowFilterSpec:
+      type: object
+      required: [kind, predicate]
+      properties:
+        kind: { type: string, enum: [row] }
+        predicate: { $ref: '#/components/schemas/RowFilterPredicate' }
+    ExpressionFilterSpec:
+      type: object
+      required: [kind, expr]
+      properties:
+        kind: { type: string, enum: [expression] }
+        expr: { type: string }
+    RegexFilterSpec:
+      type: object
+      required: [kind, pattern]
+      properties:
+        kind: { type: string, enum: [regex] }
+        pattern: { type: string }
+        flags:
+          type: array
+          items: { type: string, enum: [i, m, s] }
+          default: []
+    FilterSpec:
+      description: Added in 1.1.0 — discriminated union of the four filter kinds.
+      oneOf:
+        - $ref: '#/components/schemas/ColumnFilterSpec'
+        - $ref: '#/components/schemas/RowFilterSpec'
+        - $ref: '#/components/schemas/ExpressionFilterSpec'
+        - $ref: '#/components/schemas/RegexFilterSpec'
+      discriminator:
+        propertyName: kind
+        mapping:
+          column: '#/components/schemas/ColumnFilterSpec'
+          row: '#/components/schemas/RowFilterSpec'
+          expression: '#/components/schemas/ExpressionFilterSpec'
+          regex: '#/components/schemas/RegexFilterSpec'
     FilterRequest:
       type: object
       required: [ref, filter]
       properties:
         ref: { type: string }
-        filter: { $ref: '#/components/schemas/ColumnFilterSpec' }
+        filter: { $ref: '#/components/schemas/FilterSpec' }
         sampleSize: { type: integer, default: 20 }
     FilterResult:
       type: object
@@ -152,6 +235,49 @@ components:
       required: [resultRef]
       properties:
         resultRef: { type: string }
+    AnalysisSpec:
+      type: object
+      required: [kind]
+      properties:
+        kind:
+          type: string
+          enum: [summary_stats, group_by, chart_suggest, schema_infer]
+        options:
+          type: object
+          additionalProperties: true
+    AnalyzeRequest:
+      type: object
+      required: [ref, analysis]
+      properties:
+        ref: { type: string }
+        analysis: { $ref: '#/components/schemas/AnalysisSpec' }
+        filter:
+          allOf:
+            - $ref: '#/components/schemas/FilterSpec'
+          nullable: true
+    AnalyzeResult:
+      type: object
+      required: [kind, payload, warnings]
+      properties:
+        kind: { type: string }
+        payload:
+          type: object
+          additionalProperties: true
+        warnings:
+          type: array
+          items: { type: string }
+    SheetsRequest:
+      type: object
+      required: [ref]
+      properties:
+        ref: { type: string }
+    SheetsResult:
+      type: object
+      required: [sheets]
+      properties:
+        sheets:
+          type: array
+          items: { type: string }
     ErrorEnvelope:
       type: object
       required: [code, message, traceId]
