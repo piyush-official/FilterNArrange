@@ -6,6 +6,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
@@ -24,6 +26,7 @@ import java.util.Set;
 public class IpRateLimitFilter extends OncePerRequestFilter {
 
     private static final ObjectMapper JSON = new ObjectMapper();
+    private static final Logger log = LoggerFactory.getLogger(IpRateLimitFilter.class);
     private static final Set<String> GUARDED_PATHS = Set.of(
         "/api/v1/auth/signup",
         "/api/v1/auth/login",
@@ -53,8 +56,17 @@ public class IpRateLimitFilter extends OncePerRequestFilter {
         String ip = clientIp(req);
         long window = System.currentTimeMillis() / 60_000L;
         String key = "gw:rate:ip:" + ip + ":" + window;
-        Long count = redis.opsForValue().increment(key);
-        redis.expire(key, Duration.ofMinutes(2));
+        Long count;
+        try {
+            count = redis.opsForValue().increment(key);
+            redis.expire(key, Duration.ofMinutes(2));
+        } catch (Exception e) {
+            // Fail-open: if Redis is unavailable we'd rather admit a request
+            // than 500. Operators get an alert via the structured log line.
+            log.warn("ip-rate-limit redis call failed — failing open: {}", e.toString());
+            chain.doFilter(req, res);
+            return;
+        }
         if (count != null && count > perMinute) {
             res.setStatus(429);
             res.setHeader("Retry-After", "60");

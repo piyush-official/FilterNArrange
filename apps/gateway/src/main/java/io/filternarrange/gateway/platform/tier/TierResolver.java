@@ -32,19 +32,32 @@ public class TierResolver {
 
     public Tier resolve(UUID userId) {
         String key = KEY_PREFIX + userId;
-        String cached = redis.opsForValue().get(key);
-        if (cached != null) {
-            return Tier.fromString(cached);
+        try {
+            String cached = redis.opsForValue().get(key);
+            if (cached != null) {
+                return Tier.fromString(cached);
+            }
+        } catch (Exception e) {
+            // Cache miss path is the same as Redis outage; we just won't write
+            // back at the end. The DB lookup below still works.
         }
         Tier tier = subs.findActiveByUserId(userId)
             .filter(Subscription::isActiveNow)
             .map(Subscription::tier)
             .orElse(Tier.FREE);
-        redis.opsForValue().set(key, tier.wireValue(), CACHE_TTL);
+        try {
+            redis.opsForValue().set(key, tier.wireValue(), CACHE_TTL);
+        } catch (Exception ignored) {
+            // Cache is best-effort.
+        }
         return tier;
     }
 
     public void invalidate(UUID userId) {
-        redis.delete(KEY_PREFIX + userId);
+        try {
+            redis.delete(KEY_PREFIX + userId);
+        } catch (Exception ignored) {
+            // Tier eventually expires from the 60s TTL anyway.
+        }
     }
 }

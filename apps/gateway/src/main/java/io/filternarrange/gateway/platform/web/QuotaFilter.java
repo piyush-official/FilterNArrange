@@ -9,6 +9,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -42,6 +44,7 @@ public class QuotaFilter extends OncePerRequestFilter {
     );
 
     private static final ObjectMapper JSON = new ObjectMapper();
+    private static final Logger log = LoggerFactory.getLogger(QuotaFilter.class);
 
     private final StringRedisTemplate redis;
     private final TierResolver tierResolver;
@@ -74,8 +77,16 @@ public class QuotaFilter extends OncePerRequestFilter {
         }
         String today = LocalDate.now(ZoneOffset.UTC).toString();
         String key = "gw:rate:user:" + userId + ":ops:" + today;
-        Long count = redis.opsForValue().increment(key);
-        redis.expire(key, secondsUntilEndOfDayUtc());
+        Long count;
+        try {
+            count = redis.opsForValue().increment(key);
+            redis.expire(key, secondsUntilEndOfDayUtc());
+        } catch (Exception e) {
+            // Fail-open on Redis errors — same rationale as IpRateLimitFilter.
+            log.warn("quota redis call failed — failing open: {}", e.toString());
+            chain.doFilter(req, res);
+            return;
+        }
         if (count != null && count > cfg.dailyOps(tier)) {
             writeQuotaExceeded(res, tier);
             return;
