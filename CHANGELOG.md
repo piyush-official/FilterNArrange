@@ -4,6 +4,13 @@ All notable changes to FilterNArrange are documented here.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
 
+## [1.1.1](https://github.com/piyush-official/FilterNArrange/compare/v1.1.0...v1.1.1) (2026-06-08)
+
+
+### Documentation
+
+* **operations:** per-service deployment guide ([#28](https://github.com/piyush-official/FilterNArrange/issues/28)) ([f94bf68](https://github.com/piyush-official/FilterNArrange/commit/f94bf680bff983f7b7e1a10459c70fdf9388795e))
+
 ## [1.1.0](https://github.com/piyush-official/FilterNArrange/compare/v1.0.0...v1.1.0) (2026-06-08)
 
 
