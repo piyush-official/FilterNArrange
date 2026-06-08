@@ -308,6 +308,27 @@ services:
       start_period: 10s
     networks: [filternarrange]
 
+  backup:
+    # Plan G §T14 — nightly pg_dump + mc mirror; both write to MinIO. Schedule
+    # lives in infra/backup/crontab.
+    build:
+      context: ../backup
+    <<: *restart
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: ${POSTGRES_USER:-filternarrange}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_DB: ${POSTGRES_DB:-filternarrange}
+      MINIO_HOST: minio
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-filternarrange}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-changeme}
+    networks: [filternarrange]
+
   # ---------- Observability (Plan G §T7) ------------------------------------
   prometheus:
     image: prom/prometheus:v2.54.1
