@@ -4,6 +4,21 @@ All notable changes to FilterNArrange are documented here.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
 
+## [1.1.0](https://github.com/piyush-official/FilterNArrange/compare/v1.0.0...v1.1.0) (2026-06-08)
+
+
+### Features
+
+* **plan-g:** finish PR-2 — T8 Loki/Tempo/OTel-Collector + T12 tracing + T13 dashboards ([#24](https://github.com/piyush-official/FilterNArrange/issues/24)) ([8b7f55f](https://github.com/piyush-official/FilterNArrange/commit/8b7f55f7bd60abdd2aeed852298871ea9cf922a1))
+* **plan-h:** T1 multi-arch GHCR build + T7 tag-triggered deploy ([#20](https://github.com/piyush-official/FilterNArrange/issues/20)) ([240c498](https://github.com/piyush-official/FilterNArrange/commit/240c498a4a9fd8117b54f0e24472f94a1df0269e))
+
+
+### Bug Fixes
+
+* **compose+health:** unblock 9 latent bugs surfaced by running the stack locally ([#25](https://github.com/piyush-official/FilterNArrange/issues/25)) ([a7ff17d](https://github.com/piyush-official/FilterNArrange/commit/a7ff17dc94a684b5f9744450bea5c464e67143a5))
+* **docker:** make gateway + frontend images actually buildable ([#22](https://github.com/piyush-official/FilterNArrange/issues/22)) ([776be2c](https://github.com/piyush-official/FilterNArrange/commit/776be2cda25a734f8d3b806d12e3279bd8fbe5b6))
+* **frontend:** drop vite.config.ts/vitest.config.ts from main tsconfig include ([#23](https://github.com/piyush-official/FilterNArrange/issues/23)) ([2a35c8f](https://github.com/piyush-official/FilterNArrange/commit/2a35c8f7e6be3987a9117ceca5feaa393c3200b3))
+
 ## 1.0.0 (2026-06-08)
 
 
