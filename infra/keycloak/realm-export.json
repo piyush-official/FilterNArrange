@@ -1,0 +1,71 @@
+{
+  "realm": "filternarrange",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": true,
+  "resetPasswordAllowed": true,
+  "rememberMe": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "accessTokenLifespan": 900,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 36000,
+  "roles": {
+    "realm": [
+      { "name": "user",  "description": "Standard authenticated user" },
+      { "name": "paid",  "description": "Paid tier user" },
+      { "name": "admin", "description": "Administrative user" }
+    ]
+  },
+  "defaultRoles": ["user"],
+  "clients": [
+    {
+      "clientId": "filternarrange-frontend",
+      "name": "FilterNArrange Frontend",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "rootUrl": "http://localhost:5173",
+      "redirectUris": ["http://localhost:5173/*"],
+      "webOrigins": ["http://localhost:5173"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      }
+    },
+    {
+      "clientId": "filternarrange-gateway",
+      "name": "FilterNArrange Gateway",
+      "enabled": true,
+      "publicClient": false,
+      "bearerOnly": true,
+      "secret": "dev-only-gateway-secret",
+      "directAccessGrantsEnabled": false,
+      "standardFlowEnabled": false,
+      "serviceAccountsEnabled": true,
+      "attributes": {
+        "access.token.lifespan": "900"
+      }
+    }
+  ],
+  "users": [
+    {
+      "username": "dev-user",
+      "email": "dev@filternarrange.local",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Dev",
+      "lastName": "User",
+      "credentials": [{ "type": "password", "value": "dev-password", "temporary": false }],
+      "realmRoles": ["user"]
+    },
+    {
+      "username": "dev-paid",
+      "email": "paid@filternarrange.local",
+      "emailVerified": true,
+      "enabled": true,
+      "credentials": [{ "type": "password", "value": "paid-password", "temporary": false }],
+      "realmRoles": ["user", "paid"]
+    }
+  ]
+}
