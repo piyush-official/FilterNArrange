@@ -19,6 +19,7 @@ needed they can be removed safely.
 | `feat/plan-e-frontend-ai` | [#11](https://github.com/piyush-official/FilterNArrange/pull/11) | `3ae8d2e` | 2026-06-08 |
 | `feat/plan-f-foundation` | [#12](https://github.com/piyush-official/FilterNArrange/pull/12) | `ba19982` | 2026-06-08 |
 | `feat/plan-f-features` | [#13](https://github.com/piyush-official/FilterNArrange/pull/13) | `9b34cc5` | 2026-06-08 |
+| `feat/plan-f-frontend` | [#14](https://github.com/piyush-official/FilterNArrange/pull/14) | `2bbe05e` | 2026-06-08 |
 
 ## How to delete them
 
