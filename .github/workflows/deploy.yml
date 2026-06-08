@@ -1,0 +1,106 @@
+name: deploy
+
+# Plan H §T7 — tag-triggered deploy to the Oracle Always-Free Ampere A1 host.
+# Flow: tag push -> reuse release.yml (multi-arch GHCR build) -> SCP infra/
+# tree to /opt/filternarrange -> SSH + systemctl restart -> wait for healthy
+# -> run bash smoke -> record last-good-tag OR roll back.
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+jobs:
+  build-and-push:
+    uses: ./.github/workflows/release.yml
+    secrets: inherit
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-22.04
+    environment:
+      name: production
+      url: https://${{ vars.PUBLIC_HOST }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compute version
+        id: v
+        run: echo "version=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+
+      - name: Sync infra/ tree to VM
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host:     ${{ secrets.ORACLE_VM_HOST }}
+          username: ${{ secrets.ORACLE_VM_USER }}
+          key:      ${{ secrets.ORACLE_VM_SSH_KEY }}
+          source:   "infra/"
+          target:   "/opt/filternarrange/"
+          strip_components: 0
+
+      - name: Pull new images, restart, wait for healthy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host:     ${{ secrets.ORACLE_VM_HOST }}
+          username: ${{ secrets.ORACLE_VM_USER }}
+          key:      ${{ secrets.ORACLE_VM_SSH_KEY }}
+          script: |
+            set -euo pipefail
+            NEW_TAG="${{ steps.v.outputs.version }}"
+            sudo sed -i "s|^FNA_VERSION=.*|FNA_VERSION=${NEW_TAG}|" /etc/filternarrange/prod.env
+            sudo systemctl restart filternarrange
+            for i in $(seq 1 30); do
+              if sudo docker compose \
+                   -f /opt/filternarrange/infra/docker-compose/docker-compose.yml \
+                   -f /opt/filternarrange/infra/docker-compose/docker-compose.prod.yml \
+                   ps --format json \
+                   | jq -e 'all(.Health == "healthy" or .Health == "")' >/dev/null; then
+                echo "healthy after $((i*3))s"; exit 0
+              fi
+              sleep 3
+            done
+            echo "containers did not become healthy in 90s"
+            exit 1
+
+      - name: Run smoke against live URL
+        id: smoke
+        env:
+          PUBLIC_URL: https://${{ vars.PUBLIC_HOST }}
+        run: bash tests/smoke/smoke.sh
+
+      - name: Record new last-good-tag
+        if: steps.smoke.outcome == 'success'
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host:     ${{ secrets.ORACLE_VM_HOST }}
+          username: ${{ secrets.ORACLE_VM_USER }}
+          key:      ${{ secrets.ORACLE_VM_SSH_KEY }}
+          script: |
+            echo "${{ steps.v.outputs.version }}" \
+              | sudo tee /var/lib/filternarrange/last-good-tag
+
+      - name: Rollback on smoke failure
+        if: failure() && steps.smoke.outcome == 'failure'
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host:     ${{ secrets.ORACLE_VM_HOST }}
+          username: ${{ secrets.ORACLE_VM_USER }}
+          key:      ${{ secrets.ORACLE_VM_SSH_KEY }}
+          script: |
+            set -euo pipefail
+            PREV_TAG="$(cat /var/lib/filternarrange/last-good-tag 2>/dev/null || echo '')"
+            if [[ -z "$PREV_TAG" ]]; then
+              echo "no previous good tag — manual fix required"
+              exit 1
+            fi
+            echo "rolling back to ${PREV_TAG}"
+            sudo sed -i "s|^FNA_VERSION=.*|FNA_VERSION=${PREV_TAG}|" /etc/filternarrange/prod.env
+            sudo systemctl restart filternarrange
