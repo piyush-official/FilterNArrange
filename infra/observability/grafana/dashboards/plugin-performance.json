@@ -1,0 +1,40 @@
+{
+  "title": "FNA — Plugin Performance",
+  "uid": "fna-plugin-performance",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": { "from": "now-1h", "to": "now" },
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Plugin p50 execution by plugin_id",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{
+        "expr": "histogram_quantile(0.50, sum(rate(fna_plugin_execution_seconds_bucket[5m])) by (le, plugin_id))",
+        "legendFormat": "{{plugin_id}}"
+      }],
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Plugin p95 execution by plugin_id",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{
+        "expr": "histogram_quantile(0.95, sum(rate(fna_plugin_execution_seconds_bucket[5m])) by (le, plugin_id))",
+        "legendFormat": "{{plugin_id}}"
+      }],
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Plugin error rate by plugin_id",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{
+        "expr": "sum(rate(fna_plugin_executions_total{outcome=\"error\"}[5m])) by (plugin_id)",
+        "legendFormat": "{{plugin_id}}"
+      }],
+      "gridPos": { "x": 0, "y": 8, "w": 24, "h": 8 }
+    }
+  ]
+}

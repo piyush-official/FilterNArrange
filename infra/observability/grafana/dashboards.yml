@@ -1,0 +1,15 @@
+# Plan G §T13 — Grafana provisioning: tells Grafana to load every JSON file
+# under /etc/grafana/provisioning/dashboards/ on startup. The compose service
+# mounts ../observability/grafana/dashboards there.
+
+apiVersion: 1
+providers:
+  - name: filternarrange
+    orgId: 1
+    folder: FilterNArrange
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: false
+    options:
+      path: /etc/grafana/provisioning/dashboards

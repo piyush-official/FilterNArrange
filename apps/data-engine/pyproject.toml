@@ -18,6 +18,12 @@ dependencies = [
   "redis>=5.0",
   "psycopg[binary]>=3.2",
   "prometheus-client>=0.20",
+  # Plan G §T12 — OTLP tracing. Activated by configure_tracing() in
+  # platform/tracing.py; ships traces to otel-collector:4318/v1/traces.
+  "opentelemetry-api>=1.27",
+  "opentelemetry-sdk>=1.27",
+  "opentelemetry-exporter-otlp-proto-http>=1.27",
+  "opentelemetry-instrumentation-fastapi>=0.48b0",
 ]
 
 [project.scripts]
@@ -56,4 +62,8 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "psycopg"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "opentelemetry.*"
 ignore_missing_imports = true

@@ -360,6 +360,9 @@ services:
       GF_AUTH_ANONYMOUS_ORG_ROLE: "Viewer"
     volumes:
       - ../observability/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+      # Plan G §T13 — auto-load the five FilterNArrange dashboards on start.
+      - ../observability/grafana/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml:ro
+      - ../observability/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
     ports:
       - "3001:3000"
     networks: [filternarrange]
@@ -371,6 +374,59 @@ services:
     volumes:
       - "/:/host:ro,rslave"
     command: ["--path.rootfs=/host"]
+    networks: [filternarrange]
+
+  # Plan G §T8 — Loki receives logs from Promtail and serves them to
+  # Grafana. Single-binary mode with local filesystem storage; adequate for
+  # dev. See infra/observability/loki/loki-config.yml.
+  loki:
+    image: grafana/loki:3.1.1
+    <<: *restart
+    command: ["-config.file=/etc/loki/loki-config.yml"]
+    volumes:
+      - ../observability/loki/loki-config.yml:/etc/loki/loki-config.yml:ro
+    ports:
+      - "3100:3100"
+    networks: [filternarrange]
+
+  # Plan G §T8 — Promtail tails container stdout/stderr via the Docker
+  # socket and ships to Loki. Auto-discovers fna-* containers.
+  promtail:
+    image: grafana/promtail:3.1.1
+    <<: *restart
+    command: ["-config.file=/etc/promtail/promtail-config.yml"]
+    volumes:
+      - ../observability/promtail/promtail-config.yml:/etc/promtail/promtail-config.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on: [loki]
+    networks: [filternarrange]
+
+  # Plan G §T8 — Tempo trace backend. Accepts OTLP gRPC on 4317 and HTTP
+  # on 4318. 24-hour block retention in dev.
+  tempo:
+    image: grafana/tempo:2.6.0
+    <<: *restart
+    command: ["-config.file=/etc/tempo/tempo.yml"]
+    volumes:
+      - ../observability/tempo/tempo.yml:/etc/tempo/tempo.yml:ro
+    ports:
+      - "3200:3200"
+    networks: [filternarrange]
+
+  # Plan G §T8 — OTel Collector multiplexes OTLP from gateway + data-engine
+  # to Tempo (traces), Loki (logs), and an internal Prometheus exporter
+  # (metrics, scraped at :8889).
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.110.0
+    <<: *restart
+    command: ["--config=/etc/otelcol/otel-collector.yml"]
+    volumes:
+      - ../observability/otel-collector/otel-collector.yml:/etc/otelcol/otel-collector.yml:ro
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+      - "8889:8889"
+    depends_on: [tempo, loki]
     networks: [filternarrange]
 
   caddy:

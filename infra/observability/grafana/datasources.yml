@@ -2,6 +2,22 @@ apiVersion: 1
 datasources:
   - name: Prometheus
     type: prometheus
+    uid: prometheus
     access: proxy
     url: http://prometheus:9090
     isDefault: true
+
+  # Plan G §T8 + §T13 — Loki for log panels in api-latency / job-pipeline
+  # dashboards; Tempo for trace-to-log correlation. Both speak HTTP-OTLP /
+  # Loki API natively, no auth needed in the dev compose stack.
+  - name: Loki
+    type: loki
+    uid: loki
+    access: proxy
+    url: http://loki:3100
+
+  - name: Tempo
+    type: tempo
+    uid: tempo
+    access: proxy
+    url: http://tempo:3200

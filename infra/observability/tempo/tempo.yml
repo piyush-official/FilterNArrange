@@ -1,0 +1,28 @@
+# Plan G §T8 — Tempo single-binary mode. OTLP receivers on 4317 (gRPC) and
+# 4318 (HTTP); local filesystem backend with 24-hour block retention to fit
+# the dev loop. Prod will swap ``backend: local`` for an S3-compatible
+# bucket via prod overlay.
+
+server:
+  http_listen_port: 3200
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
+
+storage:
+  trace:
+    backend: local
+    local:
+      path: /tmp/tempo/blocks
+    wal:
+      path: /tmp/tempo/wal
+
+compactor:
+  compaction:
+    block_retention: 24h

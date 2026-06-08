@@ -1,0 +1,36 @@
+# Plan G §T8 — Loki single-binary mode for dev. Stores chunks and the TSDB
+# index on the container's local filesystem under /tmp/loki. Adequate for
+# the dev loop; persistent volumes are added for the prod overlay only when
+# log retention beyond container lifetime is required.
+
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+
+common:
+  ring:
+    kvstore:
+      store: inmemory
+  replication_factor: 1
+  path_prefix: /tmp/loki
+
+schema_config:
+  configs:
+    - from: 2024-01-01
+      store: tsdb
+      object_store: filesystem
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+
+storage_config:
+  tsdb_shipper:
+    active_index_directory: /tmp/loki/tsdb-index
+    cache_location: /tmp/loki/tsdb-cache
+  filesystem:
+    directory: /tmp/loki/chunks
+
+limits_config:
+  allow_structured_metadata: true

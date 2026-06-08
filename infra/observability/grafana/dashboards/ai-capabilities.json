@@ -1,0 +1,40 @@
+{
+  "title": "FNA — AI Capabilities",
+  "uid": "fna-ai-capabilities",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": { "from": "now-1h", "to": "now" },
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "AI capability p95 latency",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{
+        "expr": "histogram_quantile(0.95, sum(rate(fna_ai_capability_seconds_bucket[5m])) by (le, capability))",
+        "legendFormat": "{{capability}}"
+      }],
+      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 8 }
+    },
+    {
+      "type": "timeseries",
+      "title": "AI throughput by model",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{
+        "expr": "sum(rate(fna_ai_capability_requests_total[5m])) by (model)",
+        "legendFormat": "{{model}}"
+      }],
+      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 }
+    },
+    {
+      "type": "timeseries",
+      "title": "AI errors by capability",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{
+        "expr": "sum(rate(fna_ai_capability_requests_total{outcome=\"error\"}[5m])) by (capability)",
+        "legendFormat": "{{capability}}"
+      }],
+      "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 }
+    }
+  ]
+}

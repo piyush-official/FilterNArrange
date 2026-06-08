@@ -1,0 +1,48 @@
+{
+  "title": "FNA — Job Pipeline",
+  "uid": "fna-job-pipeline",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": { "from": "now-1h", "to": "now" },
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Job state transitions / sec",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{
+        "expr": "sum(rate(fna_job_state_transitions_total[5m])) by (transition)",
+        "legendFormat": "{{transition}}"
+      }],
+      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 8 }
+    },
+    {
+      "type": "stat",
+      "title": "Currently queued jobs",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{
+        "expr": "sum(fna_jobs_queued)"
+      }],
+      "gridPos": { "x": 0, "y": 8, "w": 6, "h": 6 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Worker jobs by tier",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{
+        "expr": "sum(rate(fna_worker_jobs_total[5m])) by (tier, outcome)",
+        "legendFormat": "{{tier}} / {{outcome}}"
+      }],
+      "gridPos": { "x": 6, "y": 8, "w": 18, "h": 6 }
+    },
+    {
+      "type": "logs",
+      "title": "Recent job errors",
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [{
+        "expr": "{container=~\"fna-gateway|fna-data-engine\"} | json | level=\"ERROR\" | job_id != \"\""
+      }],
+      "gridPos": { "x": 0, "y": 14, "w": 24, "h": 8 }
+    }
+  ]
+}
