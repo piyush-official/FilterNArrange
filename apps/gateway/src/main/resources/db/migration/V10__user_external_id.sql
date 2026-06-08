@@ -13,3 +13,12 @@ CREATE UNIQUE INDEX IF NOT EXISTS users_external_id_uq
 
 COMMENT ON COLUMN users.external_id IS
   'Identity-provider subject (Keycloak ''sub'' claim). NULL for users created via the spring-jwt path.';
+
+-- Keycloak-managed users authenticate against the IdP and have no local
+-- password. Drop the NOT NULL so the KeycloakUserSyncService upsert can
+-- create users without supplying a hash. Existing spring-jwt rows are
+-- unaffected.
+ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;
+
+COMMENT ON COLUMN users.password_hash IS
+  'BCrypt hash for spring-jwt users. NULL for users created via Keycloak SSO.';
