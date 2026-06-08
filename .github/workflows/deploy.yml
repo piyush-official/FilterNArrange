@@ -14,7 +14,15 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
-  contents: read
+  # The called release.yml declares contents/issues/pull-requests/packages/
+  # id-token at the workflow level — a reusable workflow can't ask for more
+  # than the caller grants, so match release.yml's declared set exactly.
+  # The release-please job inside release.yml is gated to main-push only, so
+  # these elevated scopes are unused at runtime when called from this tag
+  # flow; they're declarative ceiling only.
+  contents: write
+  pull-requests: write
+  issues: write
   packages: write
   id-token: write
 
