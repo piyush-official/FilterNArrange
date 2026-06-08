@@ -56,8 +56,11 @@ def _build_default_sweeper(cfg: RetentionConfig):
 
     minio = Minio(
         endpoint=os.environ.get("MINIO_ENDPOINT", "minio:9000").replace("http://", "").replace("https://", ""),
-        access_key=os.environ["MINIO_ROOT_USER"],
-        secret_key=os.environ["MINIO_ROOT_PASSWORD"],
+        # Match the rest of data-engine (platform/config.py) — both server-side
+        # ``MINIO_ROOT_USER`` and client-side ``MINIO_ACCESS_KEY`` get used
+        # depending on context; we accept either to avoid environment drift.
+        access_key=os.environ.get("MINIO_ACCESS_KEY") or os.environ["MINIO_ROOT_USER"],
+        secret_key=os.environ.get("MINIO_SECRET_KEY") or os.environ["MINIO_ROOT_PASSWORD"],
         secure=os.environ.get("MINIO_ENDPOINT", "").startswith("https://"),
     )
 
