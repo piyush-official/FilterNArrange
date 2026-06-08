@@ -185,8 +185,11 @@ services:
   # ---------- Application services ------------------------------------------
   gateway:
     build:
-      context: ../../apps/gateway
-      dockerfile: Dockerfile
+      # Repo-root context so apps/gateway/build.gradle.kts's
+      # ../../contracts source-set entry resolves; see gateway Dockerfile
+      # for the matching COPY paths.
+      context: ../..
+      dockerfile: apps/gateway/Dockerfile
     <<: *restart
     depends_on:
       postgres:
