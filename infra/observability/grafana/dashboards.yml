@@ -1,6 +1,9 @@
 # Plan G §T13 — Grafana provisioning: tells Grafana to load every JSON file
-# under /etc/grafana/provisioning/dashboards/ on startup. The compose service
-# mounts ../observability/grafana/dashboards there.
+# from /var/lib/grafana/dashboards on startup. The compose service mounts
+# this file at /etc/grafana/provisioning/dashboards/dashboards.yml (the
+# provider config) and the JSON tree separately at /var/lib/grafana/dashboards
+# — Grafana doesn't allow a file mount inside a directory mount at the
+# same path, hence the split.
 
 apiVersion: 1
 providers:
@@ -12,4 +15,4 @@ providers:
     updateIntervalSeconds: 30
     allowUiUpdates: false
     options:
-      path: /etc/grafana/provisioning/dashboards
+      path: /var/lib/grafana/dashboards
