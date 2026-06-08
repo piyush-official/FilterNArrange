@@ -57,11 +57,22 @@ jobs:
       - name: Resolve build context
         id: ctx
         run: |
-          if [[ "${{ matrix.app }}" == "caddy" ]]; then
-            echo "path=./infra/caddy" >> "$GITHUB_OUTPUT"
-          else
-            echo "path=./apps/${{ matrix.app }}" >> "$GITHUB_OUTPUT"
-          fi
+          case "${{ matrix.app }}" in
+            caddy)
+              echo "path=./infra/caddy"           >> "$GITHUB_OUTPUT"
+              echo "file=./infra/caddy/Dockerfile" >> "$GITHUB_OUTPUT"
+              ;;
+            gateway)
+              # Repo-root context so build.gradle.kts can resolve
+              # ../../contracts at build time.
+              echo "path=."                                   >> "$GITHUB_OUTPUT"
+              echo "file=./apps/gateway/Dockerfile"           >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "path=./apps/${{ matrix.app }}"            >> "$GITHUB_OUTPUT"
+              echo "file=./apps/${{ matrix.app }}/Dockerfile" >> "$GITHUB_OUTPUT"
+              ;;
+          esac
 
       - name: Compute tags
         id: tags
@@ -84,6 +95,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ${{ steps.ctx.outputs.path }}
+          file: ${{ steps.ctx.outputs.file }}
           platforms: linux/arm64,linux/amd64
           push: true
           tags: ${{ steps.tags.outputs.tags }}
