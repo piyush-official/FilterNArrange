@@ -2,6 +2,7 @@
 package io.filternarrange.gateway.platform.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.filternarrange.gateway.infrastructure.messaging.AuditEventPublisher;
 import io.filternarrange.gateway.platform.plugin.PluginRegistryService;
 import io.filternarrange.gateway.platform.tier.TierResolver;
 import io.filternarrange.gateway.domain.tier.Tier;
@@ -9,6 +10,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -26,13 +29,20 @@ import java.util.UUID;
 public class FeatureGateFilter extends OncePerRequestFilter {
 
     private static final ObjectMapper JSON = new ObjectMapper();
+    private static final Logger log = LoggerFactory.getLogger(FeatureGateFilter.class);
 
     private final PluginRegistryService plugins;
     private final TierResolver tierResolver;
+    private final AuditEventPublisher audit;
 
-    public FeatureGateFilter(PluginRegistryService plugins, TierResolver tierResolver) {
+    public FeatureGateFilter(
+        PluginRegistryService plugins,
+        TierResolver tierResolver,
+        AuditEventPublisher audit
+    ) {
         this.plugins = plugins;
         this.tierResolver = tierResolver;
+        this.audit = audit;
     }
 
     @Override
@@ -67,6 +77,21 @@ public class FeatureGateFilter extends OncePerRequestFilter {
             "plugin_id", pluginId,
             "upgrade_hint", "/account/billing"
         ));
+        try {
+            audit.publish(
+                userId,
+                "tier-reject",
+                req.getMethod() + " " + req.getRequestURI(),
+                JSON.valueToTree(Map.of(
+                    "reason", "FEATURE_REQUIRES_PAID_TIER",
+                    "plugin_id", pluginId,
+                    "tier", actual.wireValue()
+                )),
+                UUID.randomUUID().toString()
+            );
+        } catch (Exception e) {
+            log.warn("tier-reject audit emit failed: {}", e.toString());
+        }
     }
 
     private String resolvePluginId(HttpServletRequest req) {

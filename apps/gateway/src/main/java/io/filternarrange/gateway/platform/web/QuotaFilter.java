@@ -2,6 +2,7 @@
 package io.filternarrange.gateway.platform.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.filternarrange.gateway.infrastructure.messaging.AuditEventPublisher;
 import io.filternarrange.gateway.platform.tier.TierResolver;
 import io.filternarrange.gateway.domain.tier.Tier;
 import io.filternarrange.gateway.platform.tier.TierConfig;
@@ -49,11 +50,18 @@ public class QuotaFilter extends OncePerRequestFilter {
     private final StringRedisTemplate redis;
     private final TierResolver tierResolver;
     private final TierConfig cfg;
+    private final AuditEventPublisher audit;
 
-    public QuotaFilter(StringRedisTemplate redis, TierResolver tierResolver, TierConfig cfg) {
+    public QuotaFilter(
+        StringRedisTemplate redis,
+        TierResolver tierResolver,
+        TierConfig cfg,
+        AuditEventPublisher audit
+    ) {
         this.redis = redis;
         this.tierResolver = tierResolver;
         this.cfg = cfg;
+        this.audit = audit;
     }
 
     @Override
@@ -89,9 +97,24 @@ public class QuotaFilter extends OncePerRequestFilter {
         }
         if (count != null && count > cfg.dailyOps(tier)) {
             writeQuotaExceeded(res, tier);
+            emitReject(userId, "TIER_QUOTA_EXCEEDED", req, tier);
             return;
         }
         chain.doFilter(req, res);
+    }
+
+    private void emitReject(UUID userId, String reason, HttpServletRequest req, Tier tier) {
+        try {
+            audit.publish(
+                userId,
+                "tier-reject",
+                req.getMethod() + " " + req.getRequestURI(),
+                JSON.valueToTree(Map.of("reason", reason, "tier", tier.wireValue())),
+                UUID.randomUUID().toString()
+            );
+        } catch (Exception e) {
+            log.warn("tier-reject audit emit failed: {}", e.toString());
+        }
     }
 
     static UUID currentUserId() {

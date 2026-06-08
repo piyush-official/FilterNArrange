@@ -16,7 +16,11 @@ dependencies = [
   "aiokafka>=0.11",
   "jsonschema>=4.22",
   "redis>=5.0",
+  "psycopg[binary]>=3.2",
 ]
+
+[project.scripts]
+retention-sweep = "filternarrange_engine.retention.cli:main"
 
 [project.optional-dependencies]
 dev = [
@@ -43,4 +47,12 @@ pythonpath = ["src"]
 
 [[tool.mypy.overrides]]
 module = "aiokafka.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "minio"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "psycopg"
 ignore_missing_imports = true
