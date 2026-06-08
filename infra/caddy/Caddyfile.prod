@@ -1,0 +1,68 @@
+# Plan H §T3 — production reverse proxy + TLS + rate-limiting.
+# Requires the caddy build with caddy-ratelimit module baked in (infra/caddy/Dockerfile).
+
+{
+    email {env.ACME_EMAIL}
+    auto_https on
+
+    # Sane defaults for a single-VM deploy.
+    servers {
+        protocols h1 h2
+    }
+}
+
+{env.PUBLIC_HOST} {
+    encode zstd gzip
+
+    # ---- Security headers (Plan H §T3) ------------------------------------
+    header {
+        Strict-Transport-Security  "max-age=31536000; includeSubDomains; preload"
+        Content-Security-Policy    "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' wss://{env.PUBLIC_HOST}; frame-ancestors 'none'"
+        X-Frame-Options            "DENY"
+        X-Content-Type-Options     "nosniff"
+        Referrer-Policy            "strict-origin-when-cross-origin"
+        Permissions-Policy         "geolocation=(), microphone=(), camera=()"
+        -Server
+    }
+
+    # ---- Rate limits (per-IP) ---------------------------------------------
+    rate_limit {
+        zone auth_burst {
+            key    {remote_host}
+            events 10
+            window 1m
+        }
+        zone api_steady {
+            key    {remote_host}
+            events 600
+            window 1m
+        }
+    }
+
+    @auth path /api/v1/auth/*
+    handle @auth {
+        rate_limit auth_burst
+        reverse_proxy gateway:8080
+    }
+
+    @ws path /ws/*
+    handle @ws {
+        reverse_proxy gateway:8080
+    }
+
+    @api path /api/v1/*
+    handle @api {
+        rate_limit api_steady
+        reverse_proxy gateway:8080
+    }
+
+    @health path /health /actuator/health
+    handle @health {
+        reverse_proxy gateway:8080
+    }
+
+    # Everything else: SPA
+    handle {
+        reverse_proxy frontend:80
+    }
+}
