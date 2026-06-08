@@ -40,11 +40,15 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
     implementation("io.github.resilience4j:resilience4j-spring-boot3:2.2.0")
-    // Plan G §T3 — Keycloak OIDC support. Loaded unconditionally so the
-    // JwtDecoder bean is on the classpath; the actual filter wiring is gated
-    // on AUTH_PROVIDER=keycloak at runtime.
+    // Plan G §T3 — Keycloak OIDC support. JwtDecoder bean is gated on
+    // AUTH_PROVIDER=keycloak at runtime via AuthConfig.
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation("org.springframework.security:spring-security-oauth2-jose")
+    // Plan G §T9 — Micrometer Prometheus registry exposes /actuator/prometheus.
+    implementation("io.micrometer:micrometer-registry-prometheus")
+    // Plan G §T11 — JSON layout for logback (loaded only when SPRING_PROFILES_ACTIVE=prod).
+    runtimeOnly("ch.qos.logback.contrib:logback-json-classic:0.1.5")
+    runtimeOnly("ch.qos.logback.contrib:logback-jackson:0.1.5")
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("com.fasterxml.jackson.module:jackson-module-parameter-names")
     // networknt/json-schema-validator supports draft-2019-09 + 2020-12 natively;

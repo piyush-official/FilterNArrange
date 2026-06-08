@@ -55,6 +55,23 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
 
+management:
+  # Plan G §T9 — expose actuator + Prometheus scrape endpoint. /health is
+  # still public for the existing curl healthcheck; /prometheus is the
+  # scrape target. Detailed environment is gated on dev.
+  endpoints:
+    web:
+      exposure:
+        include: [health, info, prometheus]
+  endpoint:
+    health:
+      show-details: when-authorized
+    prometheus:
+      access: read-only
+  metrics:
+    tags:
+      application: gateway
+
 filternarrange:
   tier:
     # Plan F §5 — daily-ops / upload-MB caps. ``0`` means unlimited.
