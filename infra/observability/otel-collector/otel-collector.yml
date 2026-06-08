@@ -1,0 +1,43 @@
+# Plan G §T8 — OTel Collector accepts OTLP from gateway + data-engine
+# (set via OTEL_EXPORTER_OTLP_ENDPOINT in Plan G §T12), batches with
+# memory backpressure, and forwards traces to Tempo, logs to Loki, and
+# metrics to the collector-local Prometheus exporter (scraped at :8889).
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch: {}
+  memory_limiter:
+    limit_mib: 256
+    check_interval: 1s
+
+exporters:
+  otlp/tempo:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
+  loki:
+    endpoint: http://loki:3100/loki/api/v1/push
+  prometheus:
+    endpoint: 0.0.0.0:8889
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [otlp/tempo]
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [loki]
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [prometheus]
