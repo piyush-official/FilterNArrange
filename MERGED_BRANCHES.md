@@ -22,6 +22,7 @@ needed they can be removed safely.
 | `feat/plan-f-frontend` | [#14](https://github.com/piyush-official/FilterNArrange/pull/14) | `2bbe05e` | 2026-06-08 |
 | `feat/plan-g-auth` | [#15](https://github.com/piyush-official/FilterNArrange/pull/15) | `413adf8` | 2026-06-08 |
 | `feat/plan-g-observability` | [#16](https://github.com/piyush-official/FilterNArrange/pull/16) | `f3f41c2` | 2026-06-08 |
+| `feat/plan-g-hardening` | [#17](https://github.com/piyush-official/FilterNArrange/pull/17) | `c58f38f` | 2026-06-08 |
 
 ## How to delete them
 
