@@ -4,6 +4,57 @@ All notable changes to FilterNArrange are documented here.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
 
+## 1.0.0 (2026-06-08)
+
+
+### Features
+
+* Plan A — foundation (apps, compose, contracts, CI, ADRs) ([#1](https://github.com/piyush-official/FilterNArrange/issues/1)) ([8767015](https://github.com/piyush-official/FilterNArrange/commit/8767015412b932a08934b7752e70d394052ff89d))
+* Plan B — walking skeleton (gateway↔engine, plugins, frontend, lint contracts) ([#2](https://github.com/piyush-official/FilterNArrange/issues/2)) ([0d49f20](https://github.com/piyush-official/FilterNArrange/commit/0d49f200584b009afc403f56ebf08564e367eb76))
+* Plan C — plugin breadth (5 formats, 3 filters, 4 analyses, dispatcher) ([#3](https://github.com/piyush-official/FilterNArrange/issues/3)) ([a5827dc](https://github.com/piyush-official/FilterNArrange/commit/a5827dcaef7915e84642994107a4431f7dd043fa))
+* Plan C part 2 — gateway analyze + sheet-pick + OpenAPI 1.1 (T15-T16, T17-T22 wip) ([#4](https://github.com/piyush-official/FilterNArrange/issues/4)) ([0a39f5f](https://github.com/piyush-official/FilterNArrange/commit/0a39f5fa2064725f1f7fd6af83dab9bb4674ac72))
+* Plan C T17-T20 — frontend filter modes + Monaco + analysis tab + sheet picker ([#5](https://github.com/piyush-official/FilterNArrange/issues/5)) ([2e76923](https://github.com/piyush-official/FilterNArrange/commit/2e769239e382d96653944ca4b7baea984d162e13))
+* Plan D PR-2 — gateway async lane (Job domain + Kafka + idempotency + WebSocket fan-out) ([#7](https://github.com/piyush-official/FilterNArrange/issues/7)) ([b902500](https://github.com/piyush-official/FilterNArrange/commit/b902500cbbba9df3e57f0a93cf6977a68c96a726))
+* **plan-d:** foundations — jobs + audit_log migrations, Kafka schemas, kafka-init, MODE switch ([#6](https://github.com/piyush-official/FilterNArrange/issues/6)) ([93ec852](https://github.com/piyush-official/FilterNArrange/commit/93ec8526a5c5161f18d79f95fde85c40c176aadd))
+* **plan-d:** T12-T22 worker + frontend + integration tests ([#8](https://github.com/piyush-official/FilterNArrange/issues/8)) ([7487e3c](https://github.com/piyush-official/FilterNArrange/commit/7487e3cf29a773a509e977354da66561c31fcd57))
+* **plan-e:** PR-1 — AI foundation, plugins, FastAPI surface ([#9](https://github.com/piyush-official/FilterNArrange/issues/9)) ([4c1af4b](https://github.com/piyush-official/FilterNArrange/commit/4c1af4b756ee994f51202ad26e9faacd72abe8f8))
+* **plan-e:** PR-2 — gateway AI pass-through + OpenAPI + ai-anomaly-full job kind ([#10](https://github.com/piyush-official/FilterNArrange/issues/10)) ([f3e0888](https://github.com/piyush-official/FilterNArrange/commit/f3e08881850ab72b2e7e002c0e130614a17b494f))
+* **plan-e:** T20-T28 — frontend AI surface + concurrency test + docs ([#11](https://github.com/piyush-official/FilterNArrange/issues/11)) ([3ae8d2e](https://github.com/piyush-official/FilterNArrange/commit/3ae8d2e27a373fd0019a2e2fb0d6c6afbcf36111))
+* **plan-f:** PR-1 — tier domain + auth filters + 4 migrations ([#12](https://github.com/piyush-official/FilterNArrange/issues/12)) ([ba19982](https://github.com/piyush-official/FilterNArrange/commit/ba1998246cf545f1fd1235e31550daf427d64db3))
+* **plan-f:** PR-2 — recipes + format-requests + jobs topic split + billing ([#13](https://github.com/piyush-official/FilterNArrange/issues/13)) ([9b34cc5](https://github.com/piyush-official/FilterNArrange/commit/9b34cc5d4493f5d0c066bd81a3e6418fac967135))
+* **plan-f:** PR-3 — audit-on-reject + retention worker + frontend + e2e ([#14](https://github.com/piyush-official/FilterNArrange/issues/14)) ([2bbe05e](https://github.com/piyush-official/FilterNArrange/commit/2bbe05ef0d959ea5bd1967eda23f31ed01f4a587))
+* **plan-g:** PR-1 — Keycloak compose + V10 external_id migration ([#15](https://github.com/piyush-official/FilterNArrange/issues/15)) ([413adf8](https://github.com/piyush-official/FilterNArrange/commit/413adf8c57116c72a3b8ad57d62ad9f6db3752e7))
+* **plan-g:** PR-2 — Prometheus + Grafana + Gateway Micrometer ([#16](https://github.com/piyush-official/FilterNArrange/issues/16)) ([f3f41c2](https://github.com/piyush-official/FilterNArrange/commit/f3f41c2fa5df317fe22deb130e9439c67de9b90a))
+* **plan-g:** PR-3 — backup container + migration policy + runbooks ([#17](https://github.com/piyush-official/FilterNArrange/issues/17)) ([c58f38f](https://github.com/piyush-official/FilterNArrange/commit/c58f38f685ee204f1df7e3e41b8d0f7863690e79))
+* **plan-h:** public deploy — prod compose + Caddy + bootstrap + smoke + docs ([#18](https://github.com/piyush-official/FilterNArrange/issues/18)) ([f87d8d6](https://github.com/piyush-official/FilterNArrange/commit/f87d8d6bfdc4292b230e11296bed67f8002f22d0))
+
+
+### Documentation
+
+* add consolidated design spec, run guide, and dev-tooling cost catalog ([32bad8a](https://github.com/piyush-official/FilterNArrange/commit/32bad8aec31434b5076d1510252c62d9b53401ff))
+* **plans:** add 8 implementation plans (A-H) from empty repo to v1.0.0 ([3cd59e5](https://github.com/piyush-official/FilterNArrange/commit/3cd59e5393c7f11407ad29139d3183af783fbe88))
+
+
+### Chores
+
+* bootstrap project scaffold and design docs ([685b4b6](https://github.com/piyush-official/FilterNArrange/commit/685b4b6f00091bd16af631daa3d485fbeeda62b8))
+* track merged Plan A/B branches pending deletion ([ce7e14b](https://github.com/piyush-official/FilterNArrange/commit/ce7e14b40f64e3be75e040748f0527c457e7c881))
+* track merged Plan C branch in MERGED_BRANCHES.md ([6c8abe0](https://github.com/piyush-official/FilterNArrange/commit/6c8abe0916f57c0ecb648045f5cdbf45864fc28f))
+* track merged Plan C frontend branch in MERGED_BRANCHES.md ([4e093c2](https://github.com/piyush-official/FilterNArrange/commit/4e093c2ae1c569b93d3b0475c1614c598c4a432c))
+* track merged Plan C part 2 branch in MERGED_BRANCHES.md ([d94c97a](https://github.com/piyush-official/FilterNArrange/commit/d94c97a899ffd3a474b094b989535df122d45768))
+* track merged Plan D PR-1 foundations branch ([5381066](https://github.com/piyush-official/FilterNArrange/commit/53810664d9fa3fda1e6be01bb8a0d749291f1cd6))
+* track merged Plan D PR-2 gateway-async branch ([dac641a](https://github.com/piyush-official/FilterNArrange/commit/dac641af18d15e398bd6527a6e9a2ed129d3284b))
+* track merged Plan D PR-3 worker+frontend+integration branch ([022f1cf](https://github.com/piyush-official/FilterNArrange/commit/022f1cf56999a21ea71c5b2554e34f635a8bdab8))
+* track merged Plan E PR-1 ai-foundation branch ([0cdece4](https://github.com/piyush-official/FilterNArrange/commit/0cdece45fb86cd5a0d895b24ed5b1d7039ec6468))
+* track merged Plan E PR-2 gateway-ai branch ([ea78b9c](https://github.com/piyush-official/FilterNArrange/commit/ea78b9c38e10ff7d83d573e9935ca775746a5e18))
+* track merged Plan E PR-3 frontend-ai branch ([daaace2](https://github.com/piyush-official/FilterNArrange/commit/daaace2f2ce8db583da6d61250a4f069e1b17b74))
+* track merged Plan F PR-1 + PR-2 branches ([a034e20](https://github.com/piyush-official/FilterNArrange/commit/a034e20aa9c43398f3990a389bfbda1bde7203cc))
+* track merged Plan F PR-3 frontend branch ([cc5ef84](https://github.com/piyush-official/FilterNArrange/commit/cc5ef84a5bab1b0cbb30161d1403ba9dd334607d))
+* track merged Plan G PR-1 auth branch ([0c69ee7](https://github.com/piyush-official/FilterNArrange/commit/0c69ee7c3060e04c5544af6ab75b343300f04350))
+* track merged Plan G PR-2 observability branch ([be86d00](https://github.com/piyush-official/FilterNArrange/commit/be86d00af35430851556662c04c5d499e2602bfb))
+* track merged Plan G PR-3 hardening branch ([2232adb](https://github.com/piyush-official/FilterNArrange/commit/2232adb2601dc2fd96069e33e375999e4f15b6b4))
+* track merged Plan H public-deploy branch ([cfbc0f9](https://github.com/piyush-official/FilterNArrange/commit/cfbc0f998c57777b0677d1cd9c68a41300d10d3f))
+
 ## [Unreleased]
 
 ### Added
