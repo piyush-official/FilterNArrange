@@ -3,14 +3,18 @@ name: release
 on:
   push:
     branches: [main]
+  workflow_call:
 
 permissions:
   contents: write
   pull-requests: write
   issues: write
+  packages: write
+  id-token: write
 
 jobs:
   release-please:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Run release-please
@@ -19,3 +23,71 @@ jobs:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
           token: ${{ secrets.GITHUB_TOKEN }}
+
+  # Plan H §T1 — Multi-arch (linux/arm64 + linux/amd64) images for the Oracle
+  # Always-Free Ampere A1 host. Pushes ``ghcr.io/piyush-official/filternarrange/<app>``
+  # with three tag patterns:
+  #   - main pushes  -> ``sha-<short>`` + ``latest``
+  #   - tag pushes   -> ``vX.Y.Z`` (deploy.yml routes on these)
+  #
+  # ``retention-worker`` is intentionally absent: it shares the data-engine
+  # image with a CLI entrypoint override (see ``docker-compose.prod.yml``).
+  build-and-push:
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [gateway, data-engine, frontend, caddy]
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64,amd64
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resolve build context
+        id: ctx
+        run: |
+          if [[ "${{ matrix.app }}" == "caddy" ]]; then
+            echo "path=./infra/caddy" >> "$GITHUB_OUTPUT"
+          else
+            echo "path=./apps/${{ matrix.app }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Compute tags
+        id: tags
+        run: |
+          IMAGE=ghcr.io/piyush-official/filternarrange/${{ matrix.app }}
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/}"
+            TAGS="${IMAGE}:${VERSION}"
+          else
+            VERSION="$(git rev-parse --short HEAD)"
+            TAGS="${IMAGE}:sha-${VERSION}"
+          fi
+          if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
+            TAGS="${TAGS},${IMAGE}:latest"
+          fi
+          echo "tags=${TAGS}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push (multi-arch)
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ steps.ctx.outputs.path }}
+          platforms: linux/arm64,linux/amd64
+          push: true
+          tags: ${{ steps.tags.outputs.tags }}
+          provenance: true
+          sbom: true
+          cache-from: type=gha,scope=${{ matrix.app }}
+          cache-to: type=gha,scope=${{ matrix.app }},mode=max
