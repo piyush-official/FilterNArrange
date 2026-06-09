@@ -2,10 +2,14 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { AnalysisSpec } from './AnalysisSpec';
 import type { FilterSpec } from './FilterSpec';
-export type FilterPreviewRequest = {
+export type AnalyzeRequest = {
     uploadId: string;
-    filter: FilterSpec;
-    sampleSize?: number;
+    analysis: AnalysisSpec;
+    /**
+     * optional filter applied before analysis
+     */
+    filter?: FilterSpec | null;
 };
 

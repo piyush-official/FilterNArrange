@@ -8,11 +8,14 @@ interface VLEncoding {
   type: string;
 }
 
+type SeriesDatum = Array<string | number>;
+
 interface ChartSpec {
   mark: 'point' | 'bar' | 'line';
   score: number;
   rationale: string;
   spec: { encoding: { x: VLEncoding; y: VLEncoding } };
+  data?: SeriesDatum[];
 }
 
 interface Props {
@@ -39,7 +42,7 @@ function vlToECharts(c: ChartSpec) {
       type: c.mark === 'point' ? 'scatter'
           : c.mark === 'line' ? 'line'
           : 'bar',
-      data: [] as Array<unknown>,  // Plan C ships chart-spec only; data follow-up is Plan D scope
+      data: c.data ?? [],
     }],
   };
 }

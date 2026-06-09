@@ -2,8 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type ColumnFilterSpec = {
-    kind: 'column';
-    keep: Array<string>;
+export type RegexFilterSpec = {
+    kind: 'regex';
+    pattern: string;
+    flags?: Array<'i' | 'm' | 's'>;
 };
 

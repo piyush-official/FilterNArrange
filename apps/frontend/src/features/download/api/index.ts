@@ -1,5 +1,4 @@
 import { OpenAPI } from '../../../shared/api/generated/core/OpenAPI';
-import { ColumnFilterSpec } from '../../../shared/api/generated/models/ColumnFilterSpec';
 import { ConvertRequest } from '../../../shared/api/generated/models/ConvertRequest';
 import { PipelineService } from '../../../shared/api/generated/services/PipelineService';
 
@@ -12,7 +11,7 @@ export async function convert(uploadId: string, keep: string[],
   return PipelineService.convert({
     requestBody: {
       uploadId,
-      filter: { kind: ColumnFilterSpec.kind.COLUMN, keep },
+      filter: { kind: 'column', keep },
       outputFormat: fmt,
     },
   });
