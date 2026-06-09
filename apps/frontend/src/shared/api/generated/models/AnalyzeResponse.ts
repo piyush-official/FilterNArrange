@@ -2,8 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type ColumnFilterSpec = {
-    kind: 'column';
-    keep: Array<string>;
+export type AnalyzeResponse = {
+    kind: string;
+    payload: Record<string, any>;
+    warnings: Array<string>;
 };
 

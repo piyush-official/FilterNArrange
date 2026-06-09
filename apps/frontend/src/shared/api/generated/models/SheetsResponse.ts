@@ -2,8 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type ColumnFilterSpec = {
-    kind: 'column';
-    keep: Array<string>;
+export type SheetsResponse = {
+    sheets: Array<string>;
 };
 

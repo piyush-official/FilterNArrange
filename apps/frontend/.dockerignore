@@ -3,3 +3,15 @@ dist
 .vite
 coverage
 *.log
+
+# Local tsc -b emit. These shadow .tsx/.ts sources at module-resolve time
+# inside the image and have caused at least one false-green Docker build
+# (PR #22's frontend fix only "worked" because stale .d.ts files were
+# present; PR #23 was the real fix). Keep them out of the build context.
+*.tsbuildinfo
+src/**/*.js
+src/**/*.d.ts
+vite.config.js
+vite.config.d.ts
+vitest.config.js
+vitest.config.d.ts
