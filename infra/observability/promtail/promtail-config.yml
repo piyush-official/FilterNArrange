@@ -19,6 +19,13 @@ scrape_configs:
       - host: unix:///var/run/docker.sock
         refresh_interval: 5s
     relabel_configs:
+      # Drop containers we don't ship logs for (Docker's own infra, anything
+      # not named fna-*). Without this, Loki rejects the unmatched streams
+      # with "at least one label pair is required per stream" because the
+      # next two steps leave container/job unset.
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/fna-.*'
+        action: keep
       - source_labels: ['__meta_docker_container_name']
         regex: '/(fna-.*)'
         target_label: 'container'

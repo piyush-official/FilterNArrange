@@ -1,5 +1,11 @@
 # syntax=docker/dockerfile:1.7
 
+# Build context is the repo root (see infra/docker-compose/docker-compose.yml
+# and .github/workflows/release.yml) so the sibling `plugins/*` packages are
+# COPYable into the image alongside the engine. The engine is installed first
+# because every plugin's pyproject.toml declares `filternarrange-engine` as a
+# dependency.
+
 FROM python:3.12-slim AS base
 
 ENV PYTHONUNBUFFERED=1 \
@@ -15,10 +21,12 @@ RUN apt-get update \
 
 WORKDIR /app
 
-COPY pyproject.toml ./
-COPY src ./src
+COPY apps/data-engine/pyproject.toml ./
+COPY apps/data-engine/src ./src
+COPY plugins ./plugins
 
-RUN uv pip install --system .
+RUN uv pip install --system . \
+    && uv pip install --system ./plugins/*
 
 RUN useradd --system --uid 1001 --create-home --home-dir /home/engine engine \
     && chown -R engine:engine /app
@@ -26,7 +34,7 @@ USER engine
 
 EXPOSE 8000
 HEALTHCHECK --interval=10s --timeout=3s --start-period=15s --retries=10 \
-    CMD curl -fsS http://localhost:8000/health || exit 1
+    CMD curl -fsS http://localhost:8000/healthz || exit 1
 
 # Plan D §2: honour MODE at runtime. The Python entrypoint dispatches to
 # uvicorn (HTTP modes) or the worker loop (MODE=worker). Override MODE in
