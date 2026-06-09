@@ -234,8 +234,10 @@ services:
 
   data-engine:
     build:
-      context: ../../apps/data-engine
-      dockerfile: Dockerfile
+      # Repo-root context so the sibling plugins/* packages are visible to
+      # the Dockerfile (the engine pip-installs them after itself).
+      context: ../..
+      dockerfile: apps/data-engine/Dockerfile
     <<: *restart
     depends_on:
       redis:
@@ -277,8 +279,8 @@ services:
     # overrides the entrypoint to run the CLI in --loop mode. Sweeps every
     # RETENTION_INTERVAL_MINUTES (default 60) and exits cleanly on SIGTERM.
     build:
-      context: ../../apps/data-engine
-      dockerfile: Dockerfile
+      context: ../..
+      dockerfile: apps/data-engine/Dockerfile
     <<: *restart
     depends_on:
       postgres:

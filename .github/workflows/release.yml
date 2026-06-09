@@ -68,6 +68,12 @@ jobs:
               echo "path=."                                   >> "$GITHUB_OUTPUT"
               echo "file=./apps/gateway/Dockerfile"           >> "$GITHUB_OUTPUT"
               ;;
+            data-engine)
+              # Repo-root context so the Dockerfile can COPY sibling
+              # plugins/* packages alongside the engine.
+              echo "path=."                                   >> "$GITHUB_OUTPUT"
+              echo "file=./apps/data-engine/Dockerfile"       >> "$GITHUB_OUTPUT"
+              ;;
             *)
               echo "path=./apps/${{ matrix.app }}"            >> "$GITHUB_OUTPUT"
               echo "file=./apps/${{ matrix.app }}/Dockerfile" >> "$GITHUB_OUTPUT"
